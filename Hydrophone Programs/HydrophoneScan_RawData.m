@@ -120,7 +120,7 @@ AF_moveToMili(s,25,25) % s is serial pos in mm
 
 raster_x_size = 30; % mm 
 raster_y_size = 30; % mm 
-step_size = 15; % mm
+step_size = 10; % mm
 pause_time = 1; % seconds - Time for motion to stop before and after measurement - Oscilliscope will wait for itself
 
 raster_x = (home_pos(1) - 0.5*(raster_x_size*20000)) : step_size*20000 : (home_pos(1) + 0.5*(raster_x_size*20000)) ;
@@ -184,8 +184,8 @@ disp('Scan Complete.');
 %% Saving results
 disp('Saving...');
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-File_name = 'TEST BARNEY Vpk';
+File_name = 'test';
 
 Save_String=strcat(File_loc,File_name,'.mat');
-save(Save_String,'scanData',"-v7.3");
+save(Save_String,'scanData','xs','ys',"-v7.3");
 disp(strcat('File Saved: Data\',File_name,'.mat'));
