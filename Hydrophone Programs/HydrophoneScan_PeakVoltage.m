@@ -120,11 +120,14 @@ AF_moveToMili(s,25,25) % s is serial pos in mm
 
 raster_x_size = 30; % mm 
 raster_y_size = 30; % mm 
-step_size = 10; % mm
-pause_time = 0.25; % seconds - Time for motion to stop before and after measurement - Oscilliscope will wait for itself
+step_size = 15; % mm
+pause_time = 1; % seconds - Time for motion to stop before and after measurement - Oscilliscope will wait for itself
 
 raster_x = (home_pos(1) - 0.5*(raster_x_size*20000)) : step_size*20000 : (home_pos(1) + 0.5*(raster_x_size*20000)) ;
 raster_y = (home_pos(2) - 0.5*(raster_y_size*20000)) : step_size*20000 : (home_pos(2) + 0.5*(raster_y_size*20000)) ;
+
+xs = (raster_x - home_pos(1))/20000;
+ys = (raster_y- home_pos(2))/20000;
 
 tn = scp.RecordLength;
 Chn = 2;
@@ -147,25 +150,26 @@ pause('on')
 Xn = numel(raster_x);
 Yn = numel(raster_y);
 
+
+% Raster starts in bottom left corner, then travels +dy, reaches end travels
+% +dx and then -dy until done. 
 for ii = 1 : numel(raster_x)
     for jj = 1: numel(raster_y)
         
-        if mod(ii,2)==0 % iseven -> this makes the scan snake
+        if mod(ii,2)==0 % iseven ->  go backwards; this makes the scan snake
             raster_yROW = flip(raster_y);
+            AF_moveToPos(s, raster_x(ii), raster_yROW(jj))
+            pause(pause_time) % can tweak these to spped up or slow down scan
+            [scp, arData, darRangeMin, darRangeMax] = AF_takeMeasOscilloscope( scp );
+            pause(pause_time) % Redundant?
+            scanData(ii,end+1-jj,:,:) = arData;
         else
-            raster_yROW = raster_y;
+            AF_moveToPos(s, raster_x(ii), raster_y(jj))
+            pause(pause_time) % can tweak these to spped up or slow down scan
+            [scp, arData, darRangeMin, darRangeMax] = AF_takeMeasOscilloscope( scp );
+            pause(pause_time) % Redundant?
+            scanData(ii,jj,:,:) = arData;
         end
-      
-        AF_moveToPos(s, raster_x(ii), raster_yROW(jj))
-        
-        pause(pause_time) % can tweak these to spped up or slow down scan
-        
-        [scp, arData, darRangeMin, darRangeMax] = AF_takeMeasOscilloscope( scp );
-
-        pause(pause_time) % Redundant?
-
-        scanData(ii,jj,:,:) = arData;
-        
     end
 end
 
@@ -176,13 +180,20 @@ AF_moveToPos(s,home_pos(1),home_pos(2));
 toc
 
 disp('Scan Complete.');
-disp('Saving...');
+
+%% Peak Voltage Analysis
+% For reference: scanData = [x,y,samples,chanel];
+
+Vpk = squeeze(max(scanData(:,:,:,1),[], 3));
+pcolor(xs,ys, Vpk)
+xlabel('x (mm)')
+ylabel('y (mm)')
 
 %% Saving results
-
+disp('Saving...');
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-File_name = 'TEST BARNEY';
+File_name = 'TEST BARNEY Vpk';
 
 Save_String=strcat(File_loc,File_name,'.mat');
-save(Save_String,'scanData',"-v7.3");
+save(Save_String,'scanData','Vpk',"-v7.3");
 disp(strcat('File Saved: Data\',File_name,'.mat'));
