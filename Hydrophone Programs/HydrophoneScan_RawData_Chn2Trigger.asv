@@ -1,5 +1,5 @@
 %% Details
-% Simplest code to run hydrophone scan.
+% Which uses a trigger from channel 2 to initialise the recording at each point.
 % Produces a single array with the raw hydrophone data at each point in the raster.
 % Warning can create LARGE files
 
@@ -10,8 +10,7 @@ fclose all;
 
 %% CONNECT TO STAGE (may have to change serial port name)
 disp('Connecting to stage...')
-addpath('Stage Control')
-    if ~isempty(instrfind)
+if ~isempty(instrfind)
      fclose(instrfind);
       delete(instrfind);
 end
@@ -91,6 +90,27 @@ if exist('scp', 'var')
         clear ch;
     end
     
+    % Trigger settings
+    % Set trigger timeout:
+    scp.TriggerTimeOut = 1000 * 1e-3; % ms
+    
+    % Disable all channel trigger sources:
+    for ch = scp.Channels
+        ch.Trigger.Enabled = false;
+        clear ch;
+    end
+    
+    % Setup channel trigger:
+    chN = 2; % trigger channel
+    chTr = scp.Channels(chN).Trigger; 
+    chTr.Enabled = true;
+    chTr.Kind = TK.RISINGEDGE;
+    chTr.Levels(1) = 1; % Trigger Level (%: 0.5->50%)
+    chTr.Hystereses(1) = 0.10; % Hystereses (%)
+    
+    % Release reference:
+    clear chTr;
+    
     % Set range on each channel (V)
     scp.Channels(1).Range = 5 ;     % CHECK
     scp.Channels(2).Range = 5 ;     % CHECK
@@ -111,7 +131,7 @@ disp(strcat('Record time per measurement:',string(record_time),'s.'))
 % Use the function 'AF_moveToMili(s,pos_x,pos_y)' to set the position
 
 % move to home
-AF_moveToMili(s,25,10) % s is serial pos in mm     % CHECK
+AF_moveToMili(s,25,5) % s is serial pos in mm     % CHECK
 
 % SET CURRENT POSITION AS HOME
 [home_pos] = AF_setHome(s) ;
@@ -129,9 +149,10 @@ raster_y = (home_pos(2) - 0.5*(raster_y_size*20000)) : step_size*20000 : (home_p
 xs = (raster_x - home_pos(1))/20000;
 ys = (raster_y- home_pos(2))/20000;
 
-tn = scp.RecordLength;
+tn = scp.RecordLength; % n samples 
 Chn = 2;  % Number of chanels to be saved   % CHECK
-scanData = zeros(length(raster_x),length(raster_y), tn, Chn);
+scanData = zeros(length(raster_x),length(raster_y), tn, Chn); % scan results saved here
+
 memReq = length(raster_x)*length(raster_y)*tn*Chn*8*1e-9;
 disp(strcat('scanData requires approx:',string(memReq),'GB'))
 

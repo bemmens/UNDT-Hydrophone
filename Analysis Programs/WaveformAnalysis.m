@@ -8,4 +8,4 @@ path = strcat(folder_path,file_name,'.mat');
 load(path)
 
 %% Plot
-plot(squeeze(scanData(1,1,1:1e6,:)))
+plot(squeeze(scanData(2,2,:,:)))

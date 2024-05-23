@@ -1,5 +1,5 @@
 %% Details
-% Simplest code to run hydrophone scan.
+% Which uses a trigger from channel 2 to initialise the recording at each point.
 % Produces a single array with the raw hydrophone data at each point in the raster.
 % Warning can create LARGE files
 
@@ -10,8 +10,7 @@ fclose all;
 
 %% CONNECT TO STAGE (may have to change serial port name)
 disp('Connecting to stage...')
-addpath('Stage Control')
-    if ~isempty(instrfind)
+if ~isempty(instrfind)
      fclose(instrfind);
       delete(instrfind);
 end
@@ -73,7 +72,7 @@ if exist('scp', 'var')
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    scp.RecordLength = 3e7; % n Samples: max = 33553920 ~ 3e7 (67107840?)    % CHECK
+    scp.RecordLength = 5e3; % n Samples: max = 33553920 ~ 3e7 (67107840?)    % CHECK
     record_time = scp.RecordLength/scp.SampleFrequency;
 
     % Set pre sample ratio:
@@ -93,7 +92,7 @@ if exist('scp', 'var')
     
     % Trigger settings
     % Set trigger timeout:
-    scp.TriggerTimeOut = 1000 * 1e-3; % ms
+    scp.TriggerTimeOut = 5000 * 1e-3; % ms
     
     % Disable all channel trigger sources:
     for ch = scp.Channels
@@ -106,8 +105,8 @@ if exist('scp', 'var')
     chTr = scp.Channels(chN).Trigger; 
     chTr.Enabled = true;
     chTr.Kind = TK.FALLINGEDGE;
-    chTr.Levels(1) = 1; % Trigger Level (% of V range)
-    chTr.Hystereses(1) = 0.10; % Hystereses (% of V range)
+    chTr.Levels(1) = 0.5; % Trigger Level (%: 0.5->50%)
+    chTr.Hystereses(1) = 0.1; % Hystereses (%)
     
     % Release reference:
     clear chTr;
@@ -132,17 +131,17 @@ disp(strcat('Record time per measurement:',string(record_time),'s.'))
 % Use the function 'AF_moveToMili(s,pos_x,pos_y)' to set the position
 
 % move to home
-AF_moveToMili(s,25,25) % s is serial pos in mm     % CHECK
+AF_moveToMili(s,25,5) % s is serial pos in mm     % CHECK
 
 % SET CURRENT POSITION AS HOME
 [home_pos] = AF_setHome(s) ;
 
 %% DEFINE RASTER POINTS/AREA
 
-raster_x_size = 30; % mm           % CHECK
-raster_y_size = 30; % mm           % CHECK
-step_size = 10; % mm               % CHECK
-pause_time = 1; % seconds - Time for motion to stop before and after measurement - Oscilliscope will wait for itself     % CHECK
+raster_x_size = 1; % mm           % CHECK
+raster_y_size = 1; % mm           % CHECK
+step_size = 1; % mm               % CHECK
+pause_time = 0.1; % seconds - Time for motion to stop before and after measurement - Oscilliscope will wait for itself     % CHECK
 
 raster_x = (home_pos(1) - 0.5*(raster_x_size*20000)) : step_size*20000 : (home_pos(1) + 0.5*(raster_x_size*20000)) ;
 raster_y = (home_pos(2) - 0.5*(raster_y_size*20000)) : step_size*20000 : (home_pos(2) + 0.5*(raster_y_size*20000)) ;

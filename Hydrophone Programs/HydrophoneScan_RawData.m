@@ -73,7 +73,7 @@ if exist('scp', 'var')
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    scp.RecordLength = 3e7; % n Samples: max = 33553920 ~ 3e7 (67107840?)    % CHECK
+    scp.RecordLength = 3e5; % n Samples: max = 33553920 ~ 3e7 (67107840?)    % CHECK
     record_time = scp.RecordLength/scp.SampleFrequency;
 
     % Set pre sample ratio:
@@ -111,16 +111,16 @@ disp(strcat('Record time per measurement:',string(record_time),'s.'))
 % Use the function 'AF_moveToMili(s,pos_x,pos_y)' to set the position
 
 % move to home
-AF_moveToMili(s,25,10) % s is serial pos in mm     % CHECK
+AF_moveToMili(s,25,25) % s is serial pos in mm     % CHECK
 
 % SET CURRENT POSITION AS HOME
 [home_pos] = AF_setHome(s) ;
 
 %% DEFINE RASTER POINTS/AREA
 
-raster_x_size = 10; % mm           % CHECK
-raster_y_size = 10; % mm           % CHECK
-step_size = 5; % mm               % CHECK
+raster_x_size = 50; % mm           % CHECK
+raster_y_size = 50; % mm           % CHECK
+step_size = 10; % mm               % CHECK
 pause_time = 0.25; % seconds - Time for motion to stop before and after measurement - Oscilliscope will wait for itself     % CHECK
 
 raster_x = (home_pos(1) - 0.5*(raster_x_size*20000)) : step_size*20000 : (home_pos(1) + 0.5*(raster_x_size*20000)) ;
