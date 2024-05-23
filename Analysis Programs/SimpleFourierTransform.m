@@ -10,7 +10,7 @@ Fs = 100e6;            % Sampling frequency (Hz)
 
 %% Processing
 T = 1/Fs;             % Sampling period       
-L = length(signal);             % Length of signal
+L = length(signal);   % Length of signal
 t = (0:L-1)*T;        % Time vector
 
 Y = fft(signal);

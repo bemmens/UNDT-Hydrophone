@@ -118,10 +118,10 @@ AF_moveToMili(s,25,10) % s is serial pos in mm     % CHECK
 
 %% DEFINE RASTER POINTS/AREA
 
-raster_x_size = 10; % mm           % CHECK
-raster_y_size = 10; % mm           % CHECK
-step_size = 5; % mm               % CHECK
-pause_time = 0.25; % seconds - Time for motion to stop before and after measurement - Oscilliscope will wait for itself     % CHECK
+raster_x_size = 30; % mm           % CHECK
+raster_y_size = 30; % mm           % CHECK
+step_size = 10; % mm               % CHECK
+pause_time = 1; % seconds - Time for motion to stop before and after measurement - Oscilliscope will wait for itself     % CHECK
 
 raster_x = (home_pos(1) - 0.5*(raster_x_size*20000)) : step_size*20000 : (home_pos(1) + 0.5*(raster_x_size*20000)) ;
 raster_y = (home_pos(2) - 0.5*(raster_y_size*20000)) : step_size*20000 : (home_pos(2) + 0.5*(raster_y_size*20000)) ;
@@ -130,7 +130,7 @@ xs = (raster_x - home_pos(1))/20000;
 ys = (raster_y- home_pos(2))/20000;
 
 tn = scp.RecordLength;
-Chn = 2;  % Number of chanels to be saved  
+Chn = 2;  % Number of chanels to be saved   % CHECK
 scanData = zeros(length(raster_x),length(raster_y), tn, Chn);
 memReq = length(raster_x)*length(raster_y)*tn*Chn*8*1e-9;
 disp(strcat('scanData requires approx:',string(memReq),'GB'))
@@ -188,7 +188,7 @@ disp('Scan Complete.');
 %% Saving results
 disp('Saving...');
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'yuhan test'; % CHECK
+File_name = 'test'; % CHECK
 
 Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'scanData','raster','scp',"-v7.3");

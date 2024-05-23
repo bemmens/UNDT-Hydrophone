@@ -91,6 +91,27 @@ if exist('scp', 'var')
         clear ch;
     end
     
+    % Trigger settings
+    % Set trigger timeout:
+    scp.TriggerTimeOut = 1000 * 1e-3; % ms
+    
+    % Disable all channel trigger sources:
+    for ch = scp.Channels
+        ch.Trigger.Enabled = false;
+        clear ch;
+    end
+    
+    % Setup channel trigger:
+    chN = 2; % trigger channel
+    chTr = scp.Channels(chN).Trigger; 
+    chTr.Enabled = true;
+    chTr.Kind = TK.FALLINGEDGE;
+    chTr.Levels(1) = 1; % Trigger Level (% of V range)
+    chTr.Hystereses(1) = 0.10; % Hystereses (% of V range)
+    
+    % Release reference:
+    clear chTr;
+    
     % Set range on each channel (V)
     scp.Channels(1).Range = 5 ;     % CHECK
     scp.Channels(2).Range = 5 ;     % CHECK
@@ -111,17 +132,17 @@ disp(strcat('Record time per measurement:',string(record_time),'s.'))
 % Use the function 'AF_moveToMili(s,pos_x,pos_y)' to set the position
 
 % move to home
-AF_moveToMili(s,25,10) % s is serial pos in mm     % CHECK
+AF_moveToMili(s,25,25) % s is serial pos in mm     % CHECK
 
 % SET CURRENT POSITION AS HOME
 [home_pos] = AF_setHome(s) ;
 
 %% DEFINE RASTER POINTS/AREA
 
-raster_x_size = 10; % mm           % CHECK
-raster_y_size = 10; % mm           % CHECK
-step_size = 5; % mm               % CHECK
-pause_time = 0.25; % seconds - Time for motion to stop before and after measurement - Oscilliscope will wait for itself     % CHECK
+raster_x_size = 30; % mm           % CHECK
+raster_y_size = 30; % mm           % CHECK
+step_size = 10; % mm               % CHECK
+pause_time = 1; % seconds - Time for motion to stop before and after measurement - Oscilliscope will wait for itself     % CHECK
 
 raster_x = (home_pos(1) - 0.5*(raster_x_size*20000)) : step_size*20000 : (home_pos(1) + 0.5*(raster_x_size*20000)) ;
 raster_y = (home_pos(2) - 0.5*(raster_y_size*20000)) : step_size*20000 : (home_pos(2) + 0.5*(raster_y_size*20000)) ;
@@ -129,9 +150,10 @@ raster_y = (home_pos(2) - 0.5*(raster_y_size*20000)) : step_size*20000 : (home_p
 xs = (raster_x - home_pos(1))/20000;
 ys = (raster_y- home_pos(2))/20000;
 
-tn = scp.RecordLength;
-Chn = 2;  % Number of chanels to be saved  
-scanData = zeros(length(raster_x),length(raster_y), tn, Chn);
+tn = scp.RecordLength; % n samples 
+Chn = 2;  % Number of chanels to be saved   % CHECK
+scanData = zeros(length(raster_x),length(raster_y), tn, Chn); % scan results saved here
+
 memReq = length(raster_x)*length(raster_y)*tn*Chn*8*1e-9;
 disp(strcat('scanData requires approx:',string(memReq),'GB'))
 
@@ -188,7 +210,7 @@ disp('Scan Complete.');
 %% Saving results
 disp('Saving...');
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'yuhan test'; % CHECK
+File_name = 'test'; % CHECK
 
 Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'scanData','raster','scp',"-v7.3");
