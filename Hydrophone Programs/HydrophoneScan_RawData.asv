@@ -149,6 +149,8 @@ display(strcat('Rasters Defined, V.Approx Scan time =',num2str(Scan_time/60,3),'
 %% RASTER SCAN AND MEASURE WITH HYDROPHONE
 disp('Scan running...')
 tic;
+targetFreq = 1e6;
+record=1;
 pause('on')
 
 Xn = numel(raster_x);
@@ -187,8 +189,8 @@ disp('Scan Complete.');
 
 %% Saving results
 disp('Saving...');
-File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'test'; % CHECK
+File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
+File_name = 'test';
 
 Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'scanData','raster','scp',"-v7.3");
