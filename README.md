@@ -4,7 +4,7 @@ I think this is all the code needed to run the hydrophone with simple example sc
 # Dependencies
 Zaber Console: https://www.zaber.com/software
 
-TiePie Drivers: https://www.tiepie.com/en/download
+TiePie Drivers: https://www.tiepie.com/en/download. "WinUSB Driver"
 
 ### Hydrophone 
 Installed over USB but may not work without Microsoft .net Framework.
