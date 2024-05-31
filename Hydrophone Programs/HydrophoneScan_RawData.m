@@ -107,7 +107,12 @@ disp(strcat('Record time per measurement:',string(record_time),'s.'))
 
 % Tune the stage with Zaber GUI Interface (must quit Matlab and restart
 % once homed)
+
+% SET CURRENT POSITION AS HOME
+%[home_pos] = AF_setHome(s) ;
+
 % OR
+
 % Use the function 'AF_moveToMili(s,pos_x,pos_y)' to set the position
 
 % move to home

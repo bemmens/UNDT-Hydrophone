@@ -68,12 +68,12 @@ if exist('scp', 'var')
     scp.MeasureMode = 2; % Block Mode
 
     % Set sample frequency:
-    MHz = 25;     % CHECK
+    MHz = 50;     % CHECK
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    scp.RecordLength = 5e3; % n Samples: max = 33553920 ~ 3e7 (67107840?)    % CHECK
-    record_time = scp.RecordLength/scp.SampleFrequency;
+    record_time = 0.5/1e3; % ms % CHECK
+    scp.RecordLength = scp.SampleFrequency*record_time; % n Samples: max = 33553920 ~ 3e7 (67107840?)    
 
     % Set pre sample ratio:
     scp.PreSampleRatio = 0; 
@@ -112,7 +112,7 @@ if exist('scp', 'var')
     clear chTr;
     
     % Set range on each channel (V)
-    scp.Channels(1).Range = 5 ;     % CHECK
+    scp.Channels(1).Range = 2 ;     % CHECK
     scp.Channels(2).Range = 5 ;     % CHECK
     
     % Print oscilloscope info:
@@ -122,7 +122,7 @@ if exist('scp', 'var')
     warning('No Scope Detected')
 end
 
-disp(strcat('Record time per measurement:',string(record_time),'s.'))
+disp(strcat('Record time per measurement:',string(record_time*1e3),'ms.'))
 %% MANUALLY SET HOME WITH STAGE
 
 % Tune the stage with Zaber GUI Interface (must quit Matlab and restart
@@ -131,17 +131,18 @@ disp(strcat('Record time per measurement:',string(record_time),'s.'))
 % Use the function 'AF_moveToMili(s,pos_x,pos_y)' to set the position
 
 % move to home
-AF_moveToMili(s,25,5) % s is serial pos in mm     % CHECK
+AF_moveToMili(s,25,25) % s is serial pos in mm     % CHECK
 
+pause(5) % to allow stage to register new position
 % SET CURRENT POSITION AS HOME
 [home_pos] = AF_setHome(s) ;
 
 %% DEFINE RASTER POINTS/AREA
 
-raster_x_size = 1; % mm           % CHECK
-raster_y_size = 1; % mm           % CHECK
+raster_x_size = 25; % mm           % CHECK
+raster_y_size = 25; % mm           % CHECK
 step_size = 1; % mm               % CHECK
-pause_time = 0.1; % seconds - Time for motion to stop before and after measurement - Oscilliscope will wait for itself     % CHECK
+pause_time = 50/1000; % ms - Time for motion to stop before and after measurement - Oscilliscope will wait for itself     % CHECK
 
 raster_x = (home_pos(1) - 0.5*(raster_x_size*20000)) : step_size*20000 : (home_pos(1) + 0.5*(raster_x_size*20000)) ;
 raster_y = (home_pos(2) - 0.5*(raster_y_size*20000)) : step_size*20000 : (home_pos(2) + 0.5*(raster_y_size*20000)) ;
@@ -151,13 +152,17 @@ ys = (raster_y- home_pos(2))/20000;
 
 tn = scp.RecordLength; % n samples 
 Chn = 2;  % Number of chanels to be saved   % CHECK
-scanData = zeros(length(raster_x),length(raster_y), tn, Chn); % scan results saved here
+%scanData = zeros(length(raster_x),length(raster_y), tn, Chn); % scan results saved here (inc. trigger chanel)
+scanData = zeros(length(raster_x),length(raster_y), tn); % NO TRIGGER CHANEL
 
-memReq = length(raster_x)*length(raster_y)*tn*Chn*8*1e-9;
+%memReq = length(raster_x)*length(raster_y)*tn*Chn*8*1e-9;
+memReq = length(raster_x)*length(raster_y)*tn*8*1e-9; % NO TRIGGER CHANEL
 disp(strcat('scanData requires approx:',string(memReq),'GB'))
 
-% Save Important Variables
+% Save Raster Data
 raster.xs = xs;
+raster.raster_x = raster_x;
+raster.raster_y = raster_y;
 raster.ys = ys;
 raster.pause = pause_time;
 raster.stepsize = step_size;
@@ -168,7 +173,7 @@ Scan_time = 2*N_samples*(pause_time*2 + scp.RecordLength/scp.SampleFrequency);  
 display(strcat('Rasters Defined, V.Approx Scan time =',num2str(Scan_time/60,3),'min'));
 
 %% RASTER SCAN AND MEASURE WITH HYDROPHONE
-disp('Scan running...')
+disp('Scan Started')
 tic;
 pause('on')
 
@@ -178,23 +183,32 @@ Yn = numel(raster_y);
 
 % Raster starts in bottom left corner, then travels +dy, reaches end travels
 % +dx and then -dy until done. 
+prog = 0;
+f = waitbar(0,'Scan Running...');
 for ii = 1 : numel(raster_x)
     for jj = 1: numel(raster_y)
-        
         if mod(ii,2)==0 % iseven ->  go backwards; this makes the scan snake
+            %disp([raster_x(ii),raster_yROW(jj)])
             raster_yROW = flip(raster_y);
             AF_moveToPos(s, raster_x(ii), raster_yROW(jj))
             pause(pause_time) % can tweak these to spped up or slow down scan
             [scp, arData, darRangeMin, darRangeMax] = AF_takeMeasOscilloscope( scp );
             pause(pause_time) % Redundant?
-            scanData(ii,end+1-jj,:,:) = arData;
+            %scanData(ii,end+1-jj,:,:) = arData;
+            scanData(ii,end+1-jj,:) = arData(:,1); % NO TRIGGER MEMORY
+            %disp([ii,numel(raster_y)+1-jj])
         else
+            %disp([raster_x(ii),raster_y(jj)])
             AF_moveToPos(s, raster_x(ii), raster_y(jj))
             pause(pause_time) % can tweak these to spped up or slow down scan
             [scp, arData, darRangeMin, darRangeMax] = AF_takeMeasOscilloscope( scp );
             pause(pause_time) % Redundant?
-            scanData(ii,jj,:,:) = arData;
+            % scanData(ii,jj,:,:) = arData;
+            scanData(ii,jj,:) = arData(:,1); % NO TRIGGER MEMORY
+            %disp([ii,jj])
         end
+        prog = prog + 1;
+        f = waitbar((prog/(Xn*Yn)),f,'Scan Running...');
     end
 end
 
@@ -204,13 +218,18 @@ AF_moveToPos(s,home_pos(1),home_pos(2));
 
 toc
 
+close(f)
 disp('Scan Complete.');
 
 %% Saving results
+
+scpSettings.RecordLength = scp.RecordLength;
+scpSettings.SampleFrequency = scp.SampleFrequency;
+
 disp('Saving...');
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'test'; % CHECK
+File_name = 'PinCyclePin9'; % CHECK
 
 Save_String=strcat(File_loc,File_name,'.mat');
-save(Save_String,'scanData','raster','scp',"-v7.3");
+save(Save_String,'scanData','raster','scpSettings',"-v7.3");
 disp(strcat('File Saved: Data\',File_name,'.mat'));
