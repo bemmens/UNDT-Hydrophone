@@ -43,6 +43,7 @@ legend(string(pinNums))
 hold off
 
 %%
+figure(2)
 variation = std(waveforms,0,2);
 plot(t,variation)
 xlim([25,60])
@@ -50,4 +51,32 @@ xlabel('Time [us]')
 ylabel('Voltage [V]')
 title('Standard Deviation of Waveforms Across All Pins')
 
+%% Mean
+figure(3)
+avrg = mean(waveforms,2);
+plot(t,avrg)
+xlabel('Time [us]')
+ylabel('Voltage [V]')
+title('Mean of Waveforms Across All Pins')
+xlim([25,60])
 
+%% Band pass filter
+bpass = bandpass(avrg,[0.9e6,2e6],scpSettings.SampleFrequency); % 1 +/- 0.1MHz
+figure(4)
+plot(t,bpass)
+xlim([25,60])
+xlabel('Time [us]')
+ylabel('Voltage [V]')
+title('Mean Waveform with Bandpass Filter: 1+/-0.1MHz')
+
+%% Spectrogram
+figure(5)
+spectrogram(avrg,7e2,[],1e3,scpSettings.SampleFrequency,'yaxis');
+ylim([0,5])
+colorbar('off')
+title('Bandpassed Waveform Spectrogram')
+%xlabel('Frequency (Hz)')
+%ylabel('Time (us)')
+
+%% Listen
+soundsc(bpass,10e3) % waveform,playback sample freqency

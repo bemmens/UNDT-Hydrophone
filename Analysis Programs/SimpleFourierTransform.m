@@ -4,7 +4,7 @@
 %% Load Data
 % Consider clearing workspace to relieve RAM
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'PinCyclePin9';
+file_name = 'PinCyclePin9';                                                                                         %CHECK
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 
@@ -13,7 +13,7 @@ size(scanData)
 x_index = 13;
 y_index = 13;
 signal = squeeze(scanData(x_index,y_index,:,1)); % Time series input
-Fs = 100e6;            % Sampling frequency (Hz)     
+Fs = 50e6;            % Sampling frequency (Hz)                                                                      %CHECK
 
 %% Processing
 T = 1/Fs;             % Sampling period       
@@ -30,10 +30,11 @@ f = Fs/L*(0:(L/2));
 
 %% Plots
 figure(1)
-plot(f/1e6,P1,"LineWidth",3) 
-
-xlim([0,3])
-
+plot(f/1e6,P1,"LineWidth",1) 
+xlim([0.5,2])                                                                                                       %CHECK
+xline(1.816)
 title("Single-Sided Amplitude Spectrum")
+title('FFT of Pin 9 Waveform')
 xlabel("Frequency (MHz)")
 ylabel("Amplitude")
+yticks([])
