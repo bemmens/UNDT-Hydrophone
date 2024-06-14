@@ -131,7 +131,7 @@ disp(strcat('Record time per measurement:',string(record_time*1e3),'ms.'))
 % Use the function 'AF_moveToMili(s,pos_x,pos_y)' to set the position
 
 % move to home
-AF_moveToMili(s,25,25) % s is serial pos in mm     % CHECK
+AF_moveToMili(s,28,23) % s is serial pos in mm     % CHECK
 
 pause(5) % to allow stage to register new position
 % SET CURRENT POSITION AS HOME
@@ -139,8 +139,8 @@ pause(5) % to allow stage to register new position
 
 %% DEFINE RASTER POINTS/AREA
 
-raster_x_size = 25; % mm           % CHECK
-raster_y_size = 25; % mm           % CHECK
+raster_x_size = 20; % mm           % CHECK
+raster_y_size = 20; % mm           % CHECK
 step_size = 1; % mm               % CHECK
 pause_time = 50/1000; % ms - Time for motion to stop before and after measurement - Oscilliscope will wait for itself     % CHECK
 
@@ -152,11 +152,11 @@ ys = (raster_y- home_pos(2))/20000;
 
 tn = scp.RecordLength; % n samples 
 Chn = 2;  % Number of chanels to be saved   % CHECK
-%scanData = zeros(length(raster_x),length(raster_y), tn, Chn); % scan results saved here (inc. trigger chanel)
-scanData = zeros(length(raster_x),length(raster_y), tn); % NO TRIGGER CHANEL
+scanData = zeros(length(raster_x),length(raster_y), tn, Chn); % scan results saved here (inc. trigger chanel)
+%scanData = zeros(length(raster_x),length(raster_y), tn); % NO TRIGGER CHANEL
 
-%memReq = length(raster_x)*length(raster_y)*tn*Chn*8*1e-9;
-memReq = length(raster_x)*length(raster_y)*tn*8*1e-9; % NO TRIGGER CHANEL
+memReq = length(raster_x)*length(raster_y)*tn*Chn*8*1e-9;
+%memReq = length(raster_x)*length(raster_y)*tn*8*1e-9; % NO TRIGGER CHANEL
 disp(strcat('scanData requires approx:',string(memReq),'GB'))
 
 % Save Raster Data
@@ -194,8 +194,8 @@ for ii = 1 : numel(raster_x)
             pause(pause_time) % can tweak these to spped up or slow down scan
             [scp, arData, darRangeMin, darRangeMax] = AF_takeMeasOscilloscope( scp );
             pause(pause_time) % Redundant?
-            %scanData(ii,end+1-jj,:,:) = arData;
-            scanData(ii,end+1-jj,:) = arData(:,1); % NO TRIGGER MEMORY
+            scanData(ii,end+1-jj,:,:) = arData;
+            %scanData(ii,end+1-jj,:) = arData(:,1); % NO TRIGGER MEMORY
             %disp([ii,numel(raster_y)+1-jj])
         else
             %disp([raster_x(ii),raster_y(jj)])
@@ -203,8 +203,8 @@ for ii = 1 : numel(raster_x)
             pause(pause_time) % can tweak these to spped up or slow down scan
             [scp, arData, darRangeMin, darRangeMax] = AF_takeMeasOscilloscope( scp );
             pause(pause_time) % Redundant?
-            % scanData(ii,jj,:,:) = arData;
-            scanData(ii,jj,:) = arData(:,1); % NO TRIGGER MEMORY
+            scanData(ii,jj,:,:) = arData;
+            %scanData(ii,jj,:) = arData(:,1); % NO TRIGGER MEMORY
             %disp([ii,jj])
         end
         prog = prog + 1;
@@ -225,10 +225,11 @@ disp('Scan Complete.');
 
 scpSettings.RecordLength = scp.RecordLength;
 scpSettings.SampleFrequency = scp.SampleFrequency;
+scpSettings.timestamp = datetime;
 
 disp('Saving...');
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'PinCyclePin9'; % CHECK
+File_name = 'MatchTest20'; % CHECK
 
 Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'scanData','raster','scpSettings',"-v7.3");
