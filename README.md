@@ -3,6 +3,7 @@ I think this is all the code needed to run the hydrophone with simple example sc
 
 # Dependencies
 Zaber Console: https://www.zaber.com/software
+
 Zaber Motion Control: https://software.zaber.com/motion-library/docs/tutorials/install/matlab
 
 TiePie Drivers: https://www.tiepie.com/en/download. "WinUSB Driver"
