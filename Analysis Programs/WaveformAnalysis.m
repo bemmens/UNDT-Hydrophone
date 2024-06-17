@@ -3,21 +3,22 @@ clear all
 %% Load Data
 % Consider clearing workspace to relieve RAM
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'MatchTest16';
+file_name = '3DTest';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 
 %% Slect Data
 size(scanData)
-x_index = 5;
-y_index = 5;
-data = squeeze(scanData(x_index,y_index,:,1));
+x_index = 2;
+y_index = 2;
+z_index = 2;
+data = squeeze(scanData(x_index,y_index,z_index,:,1));
 
 %% Plot
 t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
 figure(1)
 plot(t,data)
-xlim([0,0.2*1000])
+xlim([0,0.2*100])
 hold on
 x = raster.xs(x_index);
 y = raster.ys(y_index);
