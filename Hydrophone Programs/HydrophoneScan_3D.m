@@ -157,7 +157,7 @@ display(strcat('Rasters Defined, V.Approx Scan time =',num2str(Scan_time/60,3),'
 if min(raster.home - raster.size/2) < 0
     error('ERROR: raster.size too big')
 elseif min(raster.home - raster.size/2) == 0
-    warning('RASTER TOUCHES AXIS LIMIT')
+    warning('RASTER LIMIT = AXIS LIMIT')
 end
 
 %% Make scan snake
