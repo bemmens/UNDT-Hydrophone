@@ -92,9 +92,6 @@ if exist('scp', 'var')
     scp.Channels(1).Range = 2 ;     % CHECK
     scp.Channels(2).Range = 5 ;     % CHECK
     
-    % Print oscilloscope info:
-    display(scp);
-    
     else
     warning('No Scope Detected')
 end
@@ -133,15 +130,15 @@ try
 
 disp('Moving to raster.home ...')
 
-raster.home = [10,10,20]; % home position [x,y,x] in mm     % CHECK
+raster.home = [10,10,10]; % home position [x,y,x] in mm     % CHECK
 
 xAxis.moveAbsolute(raster.home(1), Units.LENGTH_MILLIMETRES)
 yAxis.moveAbsolute(raster.home(2), Units.LENGTH_MILLIMETRES)
 zAxis.moveAbsolute(raster.home(3), Units.LENGTH_MILLIMETRES)
 disp('DONE')
 
-raster.size = [0,0,40]; % [X,Y,Z] in mm                      % CHECK
-raster.step = 0.5; % mm                                       % CHECK
+raster.size = [2,2,2]; % [X,Y,Z] in mm                      % CHECK
+raster.step = 1; % mm                                       % CHECK
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
 raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step : (raster.home(1) + 0.5*(raster.size(1))) ;
@@ -163,11 +160,13 @@ end
 %% Make scan snake
 % Define the array to store the coordinates
 snakeCoords = zeros(NPoints,3);
+ys = raster.ys;
+xs = raster.xs;
 
 % Loop through the z-axis
 for k = 1:length(raster.zs)
     % Check if the y-axis movement should be reversed
-    if mod(k, 2) == 0
+    if ys(end) == max(ys)
         ys = flip(raster.ys);
     else
         ys = raster.ys;
@@ -176,19 +175,13 @@ for k = 1:length(raster.zs)
     % Loop through the y-axis
     for j = 1:length(ys)
         % Check if the x-axis movement should be reversed
-        if mod(j, 2) == 0
+        if xs(end) == max(xs)
             xs = flip(raster.xs);
         else
             xs = raster.xs;
         end
 
-        if mod(k,2) == 0 
-            xs = flip(xs);
-        end
-        
         % Loop through the x-axis
-
-        
         for i = 1:length(xs)
             % Calculate the index for the current coordinate
             index = (k-1)*length(ys)*length(xs) + (j-1)*length(xs) + i;
