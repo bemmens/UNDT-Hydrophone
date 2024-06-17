@@ -128,14 +128,7 @@ try
 
 %% DEFINE raster
 
-disp('Moving to raster.home ...')
-
 raster.home = [10,10,10]; % home position [x,y,x] in mm     % CHECK
-
-xAxis.moveAbsolute(raster.home(1), Units.LENGTH_MILLIMETRES)
-yAxis.moveAbsolute(raster.home(2), Units.LENGTH_MILLIMETRES)
-zAxis.moveAbsolute(raster.home(3), Units.LENGTH_MILLIMETRES)
-disp('DONE')
 
 raster.size = [2,2,2]; % [X,Y,Z] in mm                      % CHECK
 raster.step = 1; % mm                                       % CHECK
@@ -144,6 +137,18 @@ raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement 
 raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step : (raster.home(1) + 0.5*(raster.size(1))) ;
 raster.ys = (raster.home(2) - 0.5*(raster.size(2))) : raster.step : (raster.home(2) + 0.5*(raster.size(2))) ;
 raster.zs = (raster.home(3) - 0.5*(raster.size(3))) : raster.step : (raster.home(3) + 0.5*(raster.size(3))) ;
+
+raster.xlims = [min(raster.xs),max(raster.xs)];
+raster.ylims = [min(raster.ys),max(raster.ys)];
+raster.zlims = [min(raster.zs),max(raster.zs)];
+
+disp('Moving to raster.home ...')
+xAxis.moveAbsolute(raster.home(1), Units.LENGTH_MILLIMETRES)
+yAxis.moveAbsolute(raster.home(2), Units.LENGTH_MILLIMETRES)
+zAxis.moveAbsolute(raster.home(3), Units.LENGTH_MILLIMETRES)
+disp('DONE')
+
+traceScanVolume(xAxis,yAxis,zAxis,raster)
 
 NPoints = length(raster.xs)*length(raster.ys)*length(raster.zs);
 step_time = 0/1e3; % s
@@ -270,3 +275,27 @@ Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'scanData','raster','scpSettings',"-v7.3");
 disp(strcat('File Saved: Data\',File_name,'.mat'));
 
+%% Functions
+function traceScanVolume(xAxis,yAxis,zAxis,raster)
+    import zaber.motion.Units;  
+    cont = 1;
+    while cont ~= 0
+        disp('Tracing Scan Volume...')
+        xAxis.moveAbsolute(raster.xlims(1), Units.LENGTH_MILLIMETRES)
+        yAxis.moveAbsolute(raster.ylims(1), Units.LENGTH_MILLIMETRES)
+        zAxis.moveAbsolute(raster.zlims(1), Units.LENGTH_MILLIMETRES)
+        xAxis.moveAbsolute(raster.xlims(2), Units.LENGTH_MILLIMETRES)
+        yAxis.moveAbsolute(raster.ylims(2), Units.LENGTH_MILLIMETRES)
+        xAxis.moveAbsolute(raster.xlims(1), Units.LENGTH_MILLIMETRES)
+        yAxis.moveAbsolute(raster.ylims(1), Units.LENGTH_MILLIMETRES)
+    
+        % Bottom done now top
+        zAxis.moveAbsolute(raster.zlims(2), Units.LENGTH_MILLIMETRES)
+        xAxis.moveAbsolute(raster.xlims(2), Units.LENGTH_MILLIMETRES)
+        yAxis.moveAbsolute(raster.ylims(2), Units.LENGTH_MILLIMETRES)
+        xAxis.moveAbsolute(raster.xlims(1), Units.LENGTH_MILLIMETRES)
+        yAxis.moveAbsolute(raster.ylims(1), Units.LENGTH_MILLIMETRES)
+
+        cont = input('Repeat? [Yes = 1, No = 0]:');
+    end
+end
