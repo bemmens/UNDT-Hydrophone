@@ -130,7 +130,7 @@ try
 
 raster.home = [10,10,10]; % home position [x,y,x] in mm     % CHECK
 
-raster.size = [2,2,2]; % [X,Y,Z] in mm                      % CHECK
+raster.size = [2,2,4]; % [X,Y,Z] in mm                      % CHECK
 raster.step = 1; % mm                                       % CHECK
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
@@ -167,6 +167,7 @@ end
 snakeCoords = zeros(NPoints,3);
 ys = raster.ys;
 xs = raster.xs;
+zs = flip(raster.zs); % invert z-axis: -ve is with gravity
 
 % Loop through the z-axis
 for k = 1:length(raster.zs)
@@ -192,7 +193,7 @@ for k = 1:length(raster.zs)
             index = (k-1)*length(ys)*length(xs) + (j-1)*length(xs) + i;
             
             % Add the current coordinate to the array
-            snakeCoords(index,:) = [xs(i), ys(j), raster.zs(k)];
+            snakeCoords(index,:) = [xs(i), ys(j), zs(k)];
         end
     end
 end
@@ -275,27 +276,3 @@ Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'scanData','raster','scpSettings',"-v7.3");
 disp(strcat('File Saved: Data\',File_name,'.mat'));
 
-%% Functions
-function traceScanVolume(xAxis,yAxis,zAxis,raster)
-    import zaber.motion.Units;  
-    cont = 1;
-    while cont ~= 0
-        disp('Tracing Scan Volume...')
-        xAxis.moveAbsolute(raster.xlims(1), Units.LENGTH_MILLIMETRES)
-        yAxis.moveAbsolute(raster.ylims(1), Units.LENGTH_MILLIMETRES)
-        zAxis.moveAbsolute(raster.zlims(1), Units.LENGTH_MILLIMETRES)
-        xAxis.moveAbsolute(raster.xlims(2), Units.LENGTH_MILLIMETRES)
-        yAxis.moveAbsolute(raster.ylims(2), Units.LENGTH_MILLIMETRES)
-        xAxis.moveAbsolute(raster.xlims(1), Units.LENGTH_MILLIMETRES)
-        yAxis.moveAbsolute(raster.ylims(1), Units.LENGTH_MILLIMETRES)
-    
-        % Bottom done now top
-        zAxis.moveAbsolute(raster.zlims(2), Units.LENGTH_MILLIMETRES)
-        xAxis.moveAbsolute(raster.xlims(2), Units.LENGTH_MILLIMETRES)
-        yAxis.moveAbsolute(raster.ylims(2), Units.LENGTH_MILLIMETRES)
-        xAxis.moveAbsolute(raster.xlims(1), Units.LENGTH_MILLIMETRES)
-        yAxis.moveAbsolute(raster.ylims(1), Units.LENGTH_MILLIMETRES)
-
-        cont = input('Repeat? [Yes = 1, No = 0]:');
-    end
-end
