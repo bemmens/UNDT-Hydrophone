@@ -169,7 +169,6 @@ raster.stepsize = step_size;
 
 N_samples = length(raster_x)*length(raster_y);
 Scan_time = 2*N_samples*(pause_time*2 + scp.RecordLength/scp.SampleFrequency);    %Very approximate
-
 display(strcat('Rasters Defined, V.Approx Scan time =',num2str(Scan_time/60,3),'min'));
 
 %% RASTER SCAN AND MEASURE WITH HYDROPHONE

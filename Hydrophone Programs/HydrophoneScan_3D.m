@@ -96,7 +96,21 @@ if exist('scp', 'var')
     warning('No Scope Detected')
 end
 
+scpSettings.RecordLength = scp.RecordLength;
+scpSettings.SampleFrequency = scp.SampleFrequency;
+scpSettings.timestamp = datetime;
+
 disp(strcat('Record time per measurement:',string(record_time*1e6),'us.'))
+
+disp('scp.SampleFrequency & redord time [MHz,us]:')
+disp(scp.SampleFrequency/1e6)
+disp(record_time*1e6)
+
+cont = input('Continue? [Yes = enter, No = 0]:');
+if cont == 0
+    cont = 1; 
+    error('Canceled.')
+end
 
 %% Initialise Zaber Satges
 
@@ -131,8 +145,8 @@ try
 % correct without having to boot up HandyScope each time.#
 
 raster.home = [25,25,20]; % home position [x,y,x] in mm     % CHECK
-raster.size = [3,4,5]; % [X,Y,Z] in mm                      % CHECK
-raster.step = [1,1,2.5]; % [dx,dy,dx] mm                                       % CHECK
+raster.size = [10,10,0]; % [X,Y,Z] in mm                      % CHECK
+raster.step = [1,1,1]; % [dx,dy,dx] mm - must be greater than zero          % CHECK
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
 raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step(1) : (raster.home(1) + 0.5*(raster.size(1))) ;
@@ -147,18 +161,31 @@ raster.relxs = raster.xs - raster.home(1);
 raster.relys = raster.ys - raster.home(2);
 raster.relzs = raster.zs - raster.home(3);
 
+disp('rater.home/size/step:')
+disp(raster.home)
+disp(raster.size)
+disp(raster.step)
+
+cont = input('Continue? [Yes = enter, No = 0]:');
+if cont == 0
+    cont = 1; 
+    error('Canceled.')
+end
+
 disp('Moving to raster.home ...')
 xAxis.moveAbsolute(raster.home(1), Units.LENGTH_MILLIMETRES)
 yAxis.moveAbsolute(raster.home(2), Units.LENGTH_MILLIMETRES)
 zAxis.moveAbsolute(raster.home(3), Units.LENGTH_MILLIMETRES)
 disp('DONE')
 
-traceScanVolume(xAxis,yAxis,zAxis,raster)
+cont = input('Continue? [Yes = enter, No = 0]:');
+if cont == 0
+    cont = 1; 
+    error('Canceled.')
+end
 
 NPoints = length(raster.xs)*length(raster.ys)*length(raster.zs);
-step_time = 0/1e3; % s
-
-Scan_time = NPoints*(raster.pause_time + step_time);    % Very approximate (actually wrong atm)
+Scan_time = 2*NPoints*(raster.pause_time*2 + scp.RecordLength/scp.SampleFrequency);    %Very approximate
 display(strcat('Rasters Defined, V.Approx Scan time =',num2str(Scan_time/60,3),'min'));
 
 if min(raster.home - raster.size/2) < 0
@@ -167,6 +194,7 @@ elseif min(raster.home - raster.size/2) == 0
     warning('RASTER LIMIT = AXIS LIMIT')
 end
 
+traceScanVolume(xAxis,yAxis,zAxis,raster)
 %% Make scan snake
 % Define the array to store the coordinates
 snakeCoords = zeros(NPoints,3);
@@ -268,10 +296,6 @@ close(f)
 disp('Scan Complete.');
 
 %% Saving results
-
-scpSettings.RecordLength = scp.RecordLength;
-scpSettings.SampleFrequency = scp.SampleFrequency;
-scpSettings.timestamp = datetime;
 
 disp('Saving...');
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
