@@ -69,7 +69,7 @@ if exist('scp', 'var')
     
     % Trigger settings
     % Set trigger timeout: 
-    scp.TriggerTimeOut = 5000 * 1e-3; % ms -> Long delay to indicate trigger not found
+    scp.TriggerTimeOut = 5 * 1e-3; % ms -> Long delay to indicate trigger not found
     
     % Disable all channel trigger sources:
     for ch = scp.Channels
@@ -127,20 +127,25 @@ try
     yAxis = deviceList(3).getAxis(1);
 
 %% DEFINE raster
+% Use scanVolumeChecker to quickly make sure that the raster parameters are
+% correct without having to boot up HandyScope each time.#
 
-raster.home = [10,10,10]; % home position [x,y,x] in mm     % CHECK
-
-raster.size = [2,2,4]; % [X,Y,Z] in mm                      % CHECK
-raster.step = 1; % mm                                       % CHECK
+raster.home = [25,25,20]; % home position [x,y,x] in mm     % CHECK
+raster.size = [3,4,5]; % [X,Y,Z] in mm                      % CHECK
+raster.step = [1,1,2.5]; % [dx,dy,dx] mm                                       % CHECK
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
-raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step : (raster.home(1) + 0.5*(raster.size(1))) ;
-raster.ys = (raster.home(2) - 0.5*(raster.size(2))) : raster.step : (raster.home(2) + 0.5*(raster.size(2))) ;
-raster.zs = (raster.home(3) - 0.5*(raster.size(3))) : raster.step : (raster.home(3) + 0.5*(raster.size(3))) ;
+raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step(1) : (raster.home(1) + 0.5*(raster.size(1))) ;
+raster.ys = (raster.home(2) - 0.5*(raster.size(2))) : raster.step(2) : (raster.home(2) + 0.5*(raster.size(2))) ;
+raster.zs = (raster.home(3) - 0.5*(raster.size(3))) : raster.step(3) : (raster.home(3) + 0.5*(raster.size(3))) ;
 
 raster.xlims = [min(raster.xs),max(raster.xs)];
 raster.ylims = [min(raster.ys),max(raster.ys)];
 raster.zlims = [min(raster.zs),max(raster.zs)];
+
+raster.relxs = raster.xs - raster.home(1);
+raster.relys = raster.ys - raster.home(2);
+raster.relzs = raster.zs - raster.home(3);
 
 disp('Moving to raster.home ...')
 xAxis.moveAbsolute(raster.home(1), Units.LENGTH_MILLIMETRES)
@@ -270,7 +275,7 @@ scpSettings.timestamp = datetime;
 
 disp('Saving...');
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = '3DTest'; % CHECK
+File_name = '3DTest2'; % CHECK
 
 Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'scanData','raster','scpSettings',"-v7.3");

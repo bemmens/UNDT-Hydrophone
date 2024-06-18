@@ -41,7 +41,7 @@ figure(5)
 spectrogram(data,3e2,[],1e3,scpSettings.SampleFrequency,'yaxis');
 ylim([0,5])
 colorbar('off')
-title('Bandpassed Waveform Spectrogram')
+title('Waveform Spectrogram')
 
 %% Band pass filter
 bpass = bandpass(data,[0.5e6,1.5e6],scpSettings.SampleFrequency); % 1 +/- 0.1MHz

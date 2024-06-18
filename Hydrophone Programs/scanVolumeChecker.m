@@ -1,4 +1,5 @@
-
+%% Use this to check quickly test your scan volume
+% All inputs on command line
 import zaber.motion.ascii.Connection;
 import zaber.motion.Units;
 
@@ -25,12 +26,12 @@ try
     xAxis = deviceList(2).getAxis(1);
     yAxis = deviceList(3).getAxis(1);
 
+
 %% DEFINE raster
-repeat = 1;
-while repeat == 1
-raster.home = input('raster.home [x,y,z]:'); % home position [x,y,x] in mm     % CHECK
-raster.size = input('raster.size [x,y,z]:'); % [X,Y,Z] in mm                      % CHECK
-raster.step = input('raster.step :'); % mm                                       % CHECK
+
+raster.home = [25,25,20.5]; % home position [x,y,x] in mm     % CHECK
+raster.size = [20,20,30]; % [X,Y,Z] in mm                      % CHECK
+raster.step = [1,1,10]; % mm  [dx,dy,dz]                                     % CHECK
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
 if min(raster.home - raster.size/2) < 0
@@ -39,9 +40,9 @@ elseif min(raster.home - raster.size/2) == 0
     warning('RASTER LIMIT = AXIS LIMIT')
 end
 
-raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step : (raster.home(1) + 0.5*(raster.size(1))) ;
-raster.ys = (raster.home(2) - 0.5*(raster.size(2))) : raster.step : (raster.home(2) + 0.5*(raster.size(2))) ;
-raster.zs = (raster.home(3) - 0.5*(raster.size(3))) : raster.step : (raster.home(3) + 0.5*(raster.size(3))) ;
+raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step(1) : (raster.home(1) + 0.5*(raster.size(1))) ;
+raster.ys = (raster.home(2) - 0.5*(raster.size(2))) : raster.step(2) : (raster.home(2) + 0.5*(raster.size(2))) ;
+raster.zs = (raster.home(3) - 0.5*(raster.size(3))) : raster.step(3) : (raster.home(3) + 0.5*(raster.size(3))) ;
 
 raster.xlims = [min(raster.xs),max(raster.xs)];
 raster.ylims = [min(raster.ys),max(raster.ys)];
@@ -51,10 +52,15 @@ disp('Moving to raster.home [x,y,zMin] ...')
 xAxis.moveAbsolute(raster.home(1), Units.LENGTH_MILLIMETRES)
 yAxis.moveAbsolute(raster.home(2), Units.LENGTH_MILLIMETRES)
 zAxis.moveAbsolute(raster.zlims(2), Units.LENGTH_MILLIMETRES)
-repeat = input('Change? [n=0/y=1]: ');
-end
 
-traceScanVolume(xAxis,yAxis,zAxis,raster)
+% UNCOMMENT TO TRACE SCAN VOLUME
+traceScanVolume(xAxis,yAxis,zAxis,raster)   
+
+% UNCOMMENT TO RETURN TO TRUE HOME
+%disp('Returning to raster.home [x0,y0,z0]...')
+%xAxis.moveAbsolute(raster.home(1), Units.LENGTH_MILLIMETRES)
+%yAxis.moveAbsolute(raster.home(2), Units.LENGTH_MILLIMETRES)
+%zAxis.moveAbsolute(raster.home(3), Units.LENGTH_MILLIMETRES)
 
 connection.close();
 catch exception
