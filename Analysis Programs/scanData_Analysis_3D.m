@@ -4,38 +4,41 @@ clear all
 
 %% Load Data
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = '3DTest';
+file_name = 'VolumeDropTest1';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
 disp(scpSettings.timestamp)
+% check size of data array - note whether one or two channel
 disp('Data Size:')
 disp(size(scanData))
 
-raster.relxs = raster.xs - raster.home(1);
-raster.relys = raster.ys - raster.home(2);
-raster.relzs = raster.zs - raster.home(3);
+%% Check Waveform and Extract Peak Voltages
+x_index = 10;
+y_index = 10;
+z_index = 1;
 
-%% Extract Peak Voltages
-pkrange = [10,15]; % us - time range to look for peak 
+pkrange = [1,100]; % us - time range to look for peak 
 pkrangeidx = pkrange*scpSettings.SampleFrequency/1e6; % corresponding array index
-Vpk = squeeze(max(scanData(:,:,:,pkrangeidx(1):pkrangeidx(2),1),[],4));
 
-%% Check Waveform
-x_index = 1;
-y_index = 2;
-z_index = 3;
-pks = find(scanData(x_index,y_index,z_index,:,1) == Vpk(x_index,y_index,z_index));
-wvfmData = squeeze(scanData(x_index,y_index,z_index,:,1));
+% remove bias
+scanData_noBias = scanData(:,:,:,:,1) - mean(scanData(:,:,:,:,1),4);
+Vpk = squeeze(max(scanData_noBias(:,:,:,pkrangeidx(1):pkrangeidx(2),1),[],4)); % max voltage at [x,y,z]
+
+pks = find(scanData_noBias(x_index,y_index,z_index,:,1) == Vpk(x_index,y_index,z_index));
+
+wvfmData = squeeze(scanData_noBias(x_index,y_index,z_index,:,1));
+
 t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
+
 figure(1)
 plot(t,wvfmData)
 xlim([0,200])
 hold on
 x = raster.relxs(x_index);
 y = raster.relys(y_index);
-z = raster.relys(z_index);
-title(strcat('Waveform at [x,y]=[',string(x),',',string(y),',',string(z),'] mm'))
+z = raster.relzs(z_index);
+title(strcat('Waveform at [x,y,z]=[',string(x),',',string(y),',',string(z),'] mm'))
 xlabel('Time [us]');
 ylabel('Amplitude [V]');
 hold off
@@ -43,38 +46,26 @@ xline(pkrange)
 xline(t(pks),'--r')
 
 
-%% Plot 
-% Double check axes orientation
-zidx = 3;
+%% plot Vpk(x,y) at different z 
+% Check axes orientation
+nZs = length(raster.zs);
 figure(1)
-imagesc(raster.relxs,raster.relys,squeeze(Vpk(:,:,zidx)))
-colorbar
-xlabel('x (mm)')
-ylabel('y (mm)')
-title('Volts')
-
-xidx = 3;
-figure(2)
-imagesc(raster.relxs,raster.relys,squeeze(Vpk(xidx,:,:)))
-colorbar
-xlabel('y (mm)')
-ylabel('z (mm)')
-title('Volts')
-
-yidx = 3;
-figure(3)
-imagesc(raster.relxs,raster.relys,squeeze(Vpk(:,yidx,:)))
-colorbar
-xlabel('x (mm)')
-ylabel('z (mm)')
-title('Volts')
+for i = 1:nZs
+    subplot(2,2,i)
+    imagesc(raster.relxs,raster.relys,squeeze(Vpk(:,:,i)))
+    colorbar
+    xlabel('x (mm)')
+    ylabel('y (mm)')
+    title(string(raster.relzs(i)))
+    %clim([0,0.1])
+end
 
 %% To MPa
 mVperMPa = 170.12; % CHECK
 MPa = Vpk*1e3/mVperMPa; 
 
 figure(2)
-imagesc(raster.xs,flip(raster.ys),rot90(MPa))
+imagesc(raster.xs,flip(raster.ys),rot90(MPa(:,:,z_index)))
 axis image;
 set(gca,'YDir','normal') % rot90, flip to get stage coords to match image
 colorbar
@@ -82,10 +73,3 @@ xlabel('x (mm)')
 ylabel('y (mm)')
 title('MPa')
 
-%% Histogram
-flatMpa = reshape(MPa,[],1);
-figure(3)
-hist(flatMpa)
-xlabel('MPa')
-ylabel('Count')
-title('Peak Pressure Distribution')

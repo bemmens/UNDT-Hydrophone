@@ -69,7 +69,7 @@ if exist('scp', 'var')
     
     % Trigger settings
     % Set trigger timeout: 
-    scp.TriggerTimeOut = 0; % No Trigger
+    scp.TriggerTimeOut = 5 * 1e-3; % ms -> Long delay to indicate trigger not found
     
     % Disable all channel trigger sources:
     for ch = scp.Channels
@@ -90,6 +90,7 @@ if exist('scp', 'var')
     
     % Set range on each channel (V)
     scp.Channels(1).Range = 2 ;     % CHECK
+    scp.Channels(2).Range = 5 ;     % CHECK
     
     else
     warning('No Scope Detected')
@@ -232,7 +233,7 @@ end
 
 %% Create results struct
 
-scanData = zeros(length(raster.xs),length(raster.ys),length(raster.zs),scp.RecordLength); % [x,y,z,wvfm]
+scanData = zeros(length(raster.xs),length(raster.ys),length(raster.zs),scp.RecordLength,2); % [x,y,z,wvfm,chanel]
 
 %% SCAN
 disp('Scan Started')
@@ -269,7 +270,7 @@ for n = 1: NPoints
     [scp, measurement] = takeMeasOscilloscope( scp );
   
     % Store the measurement in the data array
-    scanData(i,j,k,:) = measurement;
+    scanData(i,j,k,:,:) = measurement;
 
     % Admin
     oldCoords = snakeCoords(n,:);
