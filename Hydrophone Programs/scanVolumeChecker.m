@@ -31,9 +31,9 @@ try
 
 % make sure the full range of is movement is within the limits of the
 % apparatus
-raster.home = [25,25,25]; % home position [x,y,x] in mm     % CHECK
-raster.size = [0,0,30]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
-raster.step = [1,1,0.01]; % mm  [dx,dy,dz]                      % CHECK
+raster.home = [25,25,17]; % home position [x,y,x] in mm     % CHECK
+raster.size = [25,25,30]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
+raster.step = [1,1,1]; % mm  [dx,dy,dz]                      % CHECK
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
 if min(raster.home - raster.size/2) < 0
@@ -53,8 +53,8 @@ raster.zlims = [min(raster.zs),max(raster.zs)];
 % Move to x,y centre, z bottom
 disp('Moving to raster.home [x,y,zMin] ...')
 xAxis.moveAbsolute(raster.home(1), Units.LENGTH_MILLIMETRES)
-yAxis.moveAbsolute(raster.home(2), Units.LENGTH_MILLIMETRES)
-zAxis.moveAbsolute(raster.zlims(1), Units.LENGTH_MILLIMETRES)
+yAxis.moveAbsolute(raster.home(1), Units.LENGTH_MILLIMETRES)
+zAxis.moveAbsolute(raster.zlims(2), Units.LENGTH_MILLIMETRES)
 
 cont = input('Continue? [Yes = enter, No = 0]:');
 if cont == 0
@@ -63,7 +63,7 @@ if cont == 0
 end
 
 % UNCOMMENT TO TRACE SCAN VOLUME
-%traceScanVolume(xAxis,yAxis,zAxis,raster)   
+traceScanVolume(xAxis,yAxis,zAxis,raster)   
 
 % UNCOMMENT TO RETURN TO TRUE HOME
 %disp('Returning to raster.home [x0,y0,z0]...')

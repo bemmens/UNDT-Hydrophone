@@ -4,7 +4,7 @@ clear all
 
 %% Load Data
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'OpenHat3';
+file_name = 'OpenHat2';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -46,30 +46,13 @@ xline(pkrange)
 xline(t(pks),'--r')
 
 
-%% plot Vpk(x,y) at different z 
-% Check axes orientation
-nZs = length(raster.zs);
-figure(1)
-for i = 1:nZs
-    subplot(2,2,i)
-    imagesc(raster.relxs,raster.relys,squeeze(Vpk(:,:,i)))
-    colorbar
-    xlabel('x (mm)')
-    ylabel('y (mm)')
-    title(string(raster.relzs(i)))
-    %clim([0,0.1])
-end
+
+%% 
+
+plot(raster.relzs-raster.relzs(end),Vpk)
+xlabel('Distance from surface [mm]')
+ylabel('Voltage [V]')
 
 %% To MPa
 mVperMPa = 170.12; % CHECK
 MPa = Vpk*1e3/mVperMPa; 
-
-figure(2)
-imagesc(raster.xs,flip(raster.ys),rot90(MPa(:,:,z_index)))
-axis image;
-set(gca,'YDir','normal') % rot90, flip to get stage coords to match image
-colorbar
-xlabel('x (mm)')
-ylabel('y (mm)')
-title('MPa')
-

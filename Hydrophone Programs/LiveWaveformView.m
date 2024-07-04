@@ -107,7 +107,7 @@ disp(scp.SampleFrequency/1e6)
 disp(record_time*1e6)
 
 %%
-refreshRate = 10; % seconds
+refreshRate = 1; % seconds
 maxRunTime = 60*60; % seconds
 saveData.data = zeros(maxRunTime/refreshRate,scpSettings.RecordLength); % counter,wvfm
 saveData.timestamps = zeros(1,maxRunTime/refreshRate);
@@ -155,23 +155,25 @@ end
 %%
 
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'MatchingGelTest14'; % CHECK
+File_name = 'OpenHatLive3'; % CHECK
 Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'saveData','scpSettings',"-v7.3");
 disp(strcat('File Saved: Data\',File_name,'.mat'));
 
 %%
-id = 100;
-plotData = noBias(saveData.data(1,:));
-timeRX = saveData.timestamps(1);
+id = 1;
+id2 = 65;
+plotData1 = noBias(saveData.data(id,:));
+plotData2 = noBias(saveData.data(id2,:));
+timeRX = saveData.timestamps(id);
 figure(1)
-plot(t,plotData*1e3/171)
-%hold on
-%plot(t,trigger)
-%hold off
+plot(t,plotData1*1e3/171)
+hold on
+plot(t,plot(t,plotData2*1e3/171))
+hold off
 xlabel('Time [us]');
 ylabel('Pressure [MPa]')
 %ylabel('Voltage [V]');
 xlim([1,100])
 %ylim([-0.1,0.1])
-title(strcat('Elapsed Time:',string(timeRX),'s'))
+%title(strcat('Elapsed Time:',string(timeRX),'s'))
