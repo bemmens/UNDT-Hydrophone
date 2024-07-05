@@ -237,7 +237,7 @@ scanData = zeros(length(raster.xs),length(raster.ys),length(raster.zs),scp.Recor
 
 %% SCAN
 disp('Scan Started')
-tic;
+tSart = tic;
 pause('on')
 
 prog = 0;
@@ -246,6 +246,7 @@ f = waitbar(0,'Scan Running...');
 oldCoords = raster.home;
 
 for n = 1: NPoints
+    tStartStep = tic;
 % Only attempt move if position has changed
     if snakeCoords(n,1) ~= oldCoords(1)
         %disp('comX')
@@ -275,7 +276,11 @@ for n = 1: NPoints
     % Admin
     oldCoords = snakeCoords(n,:);
     prog = prog + 1;
-    f = waitbar((prog/NPoints),f,'Scan Running...');
+    dtStep = toc(tStartStep);
+    progFrac = prog/NPoints; 
+    NPointsRemaining = NPoints - prog;
+    estTimeRemaining = NPointsRemaining*dtStep/60; % minutes
+    f = waitbar((progFrac),f,strcat("Scan Running... Estimated Time Remaining: ", string(estTimeRemaining),'mins');
 
 end
 
@@ -290,7 +295,7 @@ catch exception
     rethrow(exception);
 end
 
-raster.scanDuration = toc;
+raster.scanDuration = toc(tStart);
 
 close(f)
 disp('Scan Complete.');
