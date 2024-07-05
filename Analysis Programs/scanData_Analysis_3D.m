@@ -4,7 +4,7 @@ clear all
 
 %% Load Data
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'OpenHat3';
+file_name = 'RingArrayScan1';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -18,7 +18,7 @@ x_index = 1;
 y_index = 1;
 z_index = 1;
 
-pkrange = [1,50]; % us - time range to look for peak 
+pkrange = [1,25]; % us - time range to look for peak 
 pkrangeidx = pkrange*scpSettings.SampleFrequency/1e6; % corresponding array index
 
 % remove bias
@@ -33,11 +33,11 @@ t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
 
 figure(1)
 plot(t,wvfmData)
-xlim([0,200])
+%xlim([0,200])
 hold on
-x = raster.relxs(x_index);
-y = raster.relys(y_index);
-z = raster.relzs(z_index);
+x = raster.xs(x_index);
+y = raster.ys(y_index);
+z = raster.zs(z_index);
 title(strcat('Waveform at [x,y,z]=[',string(x),',',string(y),',',string(z),'] mm'))
 xlabel('Time [us]');
 ylabel('Amplitude [V]');
@@ -51,7 +51,7 @@ xline(t(pks),'--r')
 nZs = length(raster.zs);
 figure(1)
 for i = 1:nZs
-    subplot(2,2,i)
+    subplot(1,1,i)
     imagesc(raster.relxs,raster.relys,squeeze(Vpk(:,:,i)))
     colorbar
     xlabel('x (mm)')

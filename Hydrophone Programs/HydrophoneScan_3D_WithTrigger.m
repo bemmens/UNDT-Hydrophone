@@ -49,7 +49,7 @@ if exist('scp', 'var')
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    record_time = 0.5/1e3; % seconds                % CHECK
+    record_time = 0.2/1e3; % seconds                % CHECK
     scp.RecordLength = scp.SampleFrequency*record_time; % n Samples: max = 33553920 ~ 3e7 (67107840?)    
 
     % Set pre sample ratio:
@@ -144,8 +144,8 @@ try
 % Use scanVolumeChecker to quickly make sure that the raster parameters are
 % correct without having to boot up HandyScope each time.#
 
-raster.home = [25,25,17]; % home position [x,y,x] in mm     % CHECK
-raster.size = [20 20 30]; % [X,Y,Z] in mm                      % CHECK
+raster.home = [25,25,15]; % home position [x,y,x] in mm     % CHECK
+raster.size = [30 30 0]; % [X,Y,Z] in mm                      % CHECK
 raster.step = [1,1,15]; % [dx,dy,dx] mm - must be greater than zero          % CHECK
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
@@ -299,7 +299,7 @@ disp('Scan Complete.');
 
 disp('Saving...');
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'OpenHat3'; % CHECK
+File_name = 'RingArrayScan1'; % CHECK
 
 Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'scanData','raster','scpSettings',"-v7.3");
