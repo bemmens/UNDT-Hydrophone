@@ -144,9 +144,9 @@ try
 % Use scanVolumeChecker to quickly make sure that the raster parameters are
 % correct without having to boot up HandyScope each time.#
 
-raster.home = [25,25,15]; % home position [x,y,x] in mm     % CHECK
-raster.size = [30 30 0]; % [X,Y,Z] in mm                      % CHECK
-raster.step = [1,1,15]; % [dx,dy,dx] mm - must be greater than zero          % CHECK
+raster.home = [25,25.5,0]; % home position [x,y,x] in mm     % CHECK
+raster.size = [3 3 0]; % [X,Y,Z] in mm                      % CHECK
+raster.step = [0.05,0.05,1]; % [dx,dy,dx] mm - must be greater than zero          % CHECK
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
 raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step(1) : (raster.home(1) + 0.5*(raster.size(1))) ;
@@ -194,7 +194,8 @@ elseif min(raster.home - raster.size/2) == 0
     warning('RASTER LIMIT = AXIS LIMIT')
 end
 
-traceScanVolume(xAxis,yAxis,zAxis,raster)
+
+%traceScanVolume(xAxis,yAxis,zAxis,raster) % Optional scan volume check
 %% Make scan snake
 % Define the array to store the coordinates
 snakeCoords = zeros(NPoints,3);
@@ -237,11 +238,11 @@ scanData = zeros(length(raster.xs),length(raster.ys),length(raster.zs),scp.Recor
 
 %% SCAN
 disp('Scan Started')
-tSart = tic;
+tStart = tic;
 pause('on')
 
 prog = 0;
-f = waitbar(0,'Scan Running...');
+f = waitbar(0,'Scan Starting...');
 
 oldCoords = raster.home;
 
@@ -279,8 +280,8 @@ for n = 1: NPoints
     dtStep = toc(tStartStep);
     progFrac = prog/NPoints; 
     NPointsRemaining = NPoints - prog;
-    estTimeRemaining = NPointsRemaining*dtStep/60; % minutes
-    f = waitbar((progFrac),f,strcat("Scan Running... Estimated Time Remaining: ", string(estTimeRemaining),'mins');
+    estTimeRemaining = round(NPointsRemaining*dtStep/60); % minutes
+    f = waitbar((progFrac),f,strcat("Scan Running... Estimated Time Remaining: ", string(estTimeRemaining),'mins'));
 
 end
 
@@ -304,7 +305,7 @@ disp('Scan Complete.');
 
 disp('Saving...');
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'RingArrayScan1'; % CHECK
+File_name = 'RingArrayScan14'; % CHECK
 
 Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'scanData','raster','scpSettings',"-v7.3");

@@ -4,7 +4,7 @@ clear all
 
 %% Load Data
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'OpenHat2';
+file_name = 'RingArrayScan10';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -16,7 +16,7 @@ disp(size(scanData))
 %% Check Waveform and Extract Peak Voltages
 x_index = 1;
 y_index = 1;
-z_index = 1;
+z_index = 300;
 
 pkrange = [1,50]; % us - time range to look for peak 
 pkrangeidx = pkrange*scpSettings.SampleFrequency/1e6; % corresponding array index
@@ -25,7 +25,7 @@ pkrangeidx = pkrange*scpSettings.SampleFrequency/1e6; % corresponding array inde
 scanData_noBias = scanData(:,:,:,:,1) - mean(scanData(:,:,:,:,1),4);
 Vpk = squeeze(max(scanData_noBias(:,:,:,pkrangeidx(1):pkrangeidx(2),1),[],4)); % max voltage at [x,y,z]
 
-pks = find(scanData_noBias(x_index,y_index,z_index,:,1) == Vpk(x_index,y_index,z_index));
+pks = find(scanData_noBias(x_index,y_index,z_index,:,1) == Vpk(z_index));
 
 wvfmData = squeeze(scanData_noBias(x_index,y_index,z_index,:,1));
 
@@ -35,9 +35,9 @@ figure(1)
 plot(t,wvfmData)
 xlim([0,200])
 hold on
-x = raster.relxs(x_index);
-y = raster.relys(y_index);
-z = raster.relzs(z_index);
+x = raster.xs(x_index);
+y = raster.ys(y_index);
+z = raster.zs(z_index);
 title(strcat('Waveform at [x,y,z]=[',string(x),',',string(y),',',string(z),'] mm'))
 xlabel('Time [us]');
 ylabel('Amplitude [V]');
@@ -49,9 +49,13 @@ xline(t(pks),'--r')
 
 %% 
 
-plot(raster.relzs-raster.relzs(end),Vpk)
-xlabel('Distance from surface [mm]')
-ylabel('Voltage [V]')
+plot(raster.zs,Vpk)
+xlabel('Z Position [mm]')
+ylabel('Peak Voltage [V]')
+x = raster.xs(x_index);
+y = raster.ys(y_index);
+z = raster.zs(z_index);
+title(strcat('Scan Home: [x,y,z]=[',string(raster.home(1)),',',string(raster.home(2)),',',string(raster.home(3)),'] mm'))
 
 %% To MPa
 mVperMPa = 170.12; % CHECK

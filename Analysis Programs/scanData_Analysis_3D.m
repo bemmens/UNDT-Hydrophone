@@ -4,7 +4,7 @@ clear all
 
 %% Load Data
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'RingArrayScan1';
+file_name = 'RingArrayScan14';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -14,11 +14,11 @@ disp('Data Size:')
 disp(size(scanData))
 
 %% Check Waveform and Extract Peak Voltages
-x_index = 1;
-y_index = 1;
+x_index = 23;
+y_index = 23;
 z_index = 1;
 
-pkrange = [1,25]; % us - time range to look for peak 
+pkrange = [1,45]; % us - time range to look for peak 
 pkrangeidx = pkrange*scpSettings.SampleFrequency/1e6; % corresponding array index
 
 % remove bias
@@ -51,12 +51,12 @@ xline(t(pks),'--r')
 nZs = length(raster.zs);
 figure(1)
 for i = 1:nZs
-    subplot(1,1,i)
-    imagesc(raster.relxs,raster.relys,squeeze(Vpk(:,:,i)))
+    subplot(2,2,i)
+    imagesc(raster.xs,raster.ys,squeeze(Vpk(:,:,i)))
     colorbar
     xlabel('x (mm)')
     ylabel('y (mm)')
-    title(string(raster.relzs(i)))
+    title(string(raster.zs(i)))
     %clim([0,0.1])
 end
 
@@ -72,4 +72,5 @@ colorbar
 xlabel('x (mm)')
 ylabel('y (mm)')
 title('MPa')
+clim([0.1,0.8])
 

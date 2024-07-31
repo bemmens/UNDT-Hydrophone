@@ -49,7 +49,7 @@ if exist('scp', 'var')
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    record_time = 0.2/1e3; % ms                % CHECK
+    record_time = 0.1/1e3; % ms                % CHECK
     scp.RecordLength = scp.SampleFrequency*record_time; % n Samples: max = 33553920 ~ 3e7 (67107840?)    
 
     % Set pre sample ratio:
@@ -89,7 +89,7 @@ if exist('scp', 'var')
     clear chTr;
     
     % Set range on each channel (V)
-    scp.Channels(1).Range = 2 ;     % CHECK
+    scp.Channels(1).Range = 1 ;     % CHECK
     scp.Channels(2).Range = 5 ;     % CHECK
     
     else
@@ -98,7 +98,7 @@ end
 
 scpSettings.RecordLength = scp.RecordLength;
 scpSettings.SampleFrequency = scp.SampleFrequency;
-
+scpSettings.scp.PreSampleRatio = scp.PreSampleRatio; 
 
 disp(strcat('Record time per measurement:',string(record_time*1e6),'us.'))
 
@@ -108,7 +108,7 @@ disp(record_time*1e6)
 
 %%
 refreshRate = 30; % seconds
-maxRunTime = 60*60; % seconds
+maxRunTime = 120*60; % seconds
 saveData.data = zeros(maxRunTime/refreshRate,scpSettings.RecordLength); % counter,wvfm
 saveData.timestamps = zeros(1,maxRunTime/refreshRate);
 
@@ -138,8 +138,9 @@ while run == 1
     %hold off
     xlabel('Time [us]');
     ylabel('Voltage [V]');
-    xlim([1,100])
-    %ylim([-0.1,0.1])
+    %xlim([17.5,32.5])
+    ymax = max(wvfm);
+    ylim([-ymax*1.1,ymax*1.1])
     title(strcat('Elapsed Time:',string(elapsedTime),'s'))
 
     saveData.data(counter,:) = measurement(:,1);
@@ -155,7 +156,7 @@ end
 %%
 
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'RingArray1hr'; % CHECK
+File_name = 'RingArray2HrsPostCooldown'; % CHECK
 Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'saveData','scpSettings',"-v7.3");
 disp(strcat('File Saved: Data\',File_name,'.mat'));

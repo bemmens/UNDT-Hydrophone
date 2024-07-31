@@ -1,5 +1,5 @@
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'RingArray1hr'; % CHECK
+File_name = 'RingArray2Hrs'; % CHECK
 Save_String=strcat(File_loc,File_name,'.mat');
 load(Save_String)
 
@@ -32,7 +32,7 @@ figure(2)
 plot(timestamps/60,mean_mag/mean_mag(1))
 xlabel('Time [Minutes]')
 ylabel('Fraction of V(t=0)')
-title('Mean(abs(waveform voltage) over 1hr ')
+title('Mean(abs(waveform voltage) over ~2hrs ')
 
 %%
 src.Value = 1;
@@ -44,10 +44,10 @@ updatePlot(src, t, wvfms,saveData)
 
 function updatePlot(src, t, wvfms,saveData)
     plot(t, wvfms(:, round(src.Value)))
-    disp(src.Value)
     xlabel('Time [us]')
     ylabel('Volts')
-    ylim([-1,1])
+    ylim([-1,1.5])
+    xlim([0,25])
     time = saveData.timestamps(round(src.Value));
     title(strcat('Waveform @ t =',string(time/60),'mins'))
 end
