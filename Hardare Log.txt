@@ -1,5 +1,0 @@
---- Fibre Condition ---
-- Definitely Broken
-- Probably Broken
-FP158-07
-- Good
