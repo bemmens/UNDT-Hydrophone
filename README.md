@@ -13,3 +13,10 @@ Installed over USB but may not work without Microsoft .net Framework.
 
 Latest version: https://dotnet.microsoft.com/en-us/download/dotnet-framework
 version 3.5 might be better.... not sure if they conflict are both needed or just one...
+
+# Hardware Log
+For noting damage, repairs, modifications, calibrations etc. follow the link below:
+
+https://uob-my.sharepoint.com/:x:/g/personal/gv19838_bristol_ac_uk/ETRJTe4MjYBKgwyuKm2zjoQBXKSgkL3rWJpyyOVrYCD_pw?e=XhakF8
+
+
