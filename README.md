@@ -1,6 +1,9 @@
 # UNDT-Hydrophone
 I think this is all the code needed to run the hydrophone with simple example scripts.
 
+# Hardware Instructions
+In Progress
+
 # Dependencies
 Zaber Console: https://www.zaber.com/software
 
