@@ -10,7 +10,7 @@ fclose all;
 Input = load('ScanParametersTest');
 scpSettings.scanVersion = 1;
 
-if Input.inputVersion ~= scpSettings.scanVersion
+if Input.inputVersion ~= scpSettings.scanVersion % Ensure scan, and input file are compatible
     error('Incompatible version')
 end
 
@@ -305,8 +305,8 @@ disp('Scan Complete');
 %% Saving results
 
 disp('Saving...');
-File_loc = Input.File_loc; % CHECK
-File_name = Input.File_name; % CHECK
+File_loc = Input.File_loc;
+File_name = Input.File_name;
 
 Save_String=strcat(File_loc,File_name,'.mat');
 if isfile(Save_String)
