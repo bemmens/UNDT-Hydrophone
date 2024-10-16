@@ -1,5 +1,5 @@
 %% Details
-% Description
+% Added repeat functions, overwrite protection
 
 clear all;
 close all;
@@ -98,7 +98,9 @@ end
 
 scpSettings.RecordLength = scp.RecordLength;
 scpSettings.SampleFrequency = scp.SampleFrequency;
+scpSettings.nRepeats = 5;           % CHECK
 scpSettings.timestamp = datetime;
+scpSettings.scanVersion = 1;
 
 disp(strcat('Record time per measurement:',string(record_time*1e6),'us.'))
 
@@ -162,13 +164,8 @@ zsize = zmax-zmin;
 raster.home = [xhome,yhome,zhome]; % home position [x,y,x] in mm     % CHECK
 raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-%raster.home = [23.75,27,31.5]; % home position [x,y,x] in mm     % CHECK
-%raster.size = [15 15 0]; % [X,Y,Z] in mm                      % CHECK
-
-%raster.step = [0.25,0.25,0.2]; % [dx,dy,dx] mm - must be greater than zero          % CHECK
-
-raster.home = [23.75,27,20]; % home position [x,y,x] in mm     % CHECK
-raster.size = [10 0 40]; % [X,Y,Z] in mm                      % CHECK
+%raster.home = [23.75,27,20]; % home position [x,y,x] in mm     % CHECK
+%raster.size = [10 0 40]; % [X,Y,Z] in mm                      % CHECK
 
 raster.step = [0.25,0.25,0.25]; % [dx,dy,dx] mm - must be greater than zero          % CHECK
 
@@ -209,18 +206,14 @@ if cont == 0
     error('Canceled.')
 end
 
-NPoints = length(raster.xs)*length(raster.ys)*length(raster.zs);
-Scan_time = 2*NPoints*(raster.pause_time*2 + scp.RecordLength/scp.SampleFrequency);    %Very approximate
-display(strcat('Rasters Defined, V.Approx Scan time =',num2str(Scan_time/60,3),'min'));
-
 if min(raster.home - raster.size/2) < 0
     error('ERROR: raster.size too big')
 elseif min(raster.home - raster.size/2) == 0
     warning('RASTER LIMIT = AXIS LIMIT')
 end
 
-
 %traceScanVolume(xAxis,yAxis,zAxis,raster) % Optional scan volume check
+
 %% Make scan snake
 % Define the array to store the coordinates
 snakeCoords = zeros(NPoints,3);
@@ -259,7 +252,7 @@ end
 
 %% Create results struct
 
-scanData = zeros(length(raster.xs),length(raster.ys),length(raster.zs),scp.RecordLength,2); % [x,y,z,wvfm,chanel]
+scanData = zeros(length(raster.xs),length(raster.ys),length(raster.zs),scp.RecordLength,2,scpSettings.nRepeats); % [x,y,z,wvfm,chanel,nth repeat]
 
 %% SCAN
 disp('Scan Started')
@@ -273,7 +266,7 @@ oldCoords = raster.home;
 
 for n = 1: NPoints
     tStartStep = tic;
-% Only attempt move if position has changed
+% Only engage axis if position has changed
     if snakeCoords(n,1) ~= oldCoords(1)
         %disp('comX')
         xAxis.moveAbsolute(snakeCoords(n,1), Units.LENGTH_MILLIMETRES)
@@ -286,21 +279,24 @@ for n = 1: NPoints
         zAxis.moveAbsolute(snakeCoords(n,3), Units.LENGTH_MILLIMETRES)
     end
 
-    pause(raster.pause_time) % can tweak this to spped up or slow down scan
+    pause(raster.pause_time) % can tweak this to speed up or slow down scan: risk of shaky sensor
 
     % Calculate the indices for the current coordinate
     i = find(raster.xs == snakeCoords(n,1));
     j = find(raster.ys == snakeCoords(n,2));
     k = find(raster.zs == snakeCoords(n,3));
 
-    % Take measurement
-    [scp, measurement] = takeMeasOscilloscope( scp );
-  
-    % Store the measurement in the data array
-    scanData(i,j,k,:,:) = measurement;
+    for r = 1:scpSettings.nRepeats
+        % Take measurement
+        [scp, measurement] = takeMeasOscilloscope( scp );
+      
+        % Store the measurement in the data array
+        scanData(i,j,k,:,:,r) = measurement;
+    end
 
     % Admin
     oldCoords = snakeCoords(n,:);
+    % Progress tracking
     prog = prog + 1;
     dtStep = toc(tStartStep);
     progFrac = prog/NPoints; 
@@ -330,9 +326,12 @@ disp('Scan Complete');
 
 disp('Saving...');
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'DIYMk1Test26'; % CHECK
+File_name = 'repeats_test'; % CHECK
 
 Save_String=strcat(File_loc,File_name,'.mat');
-save(Save_String,'scanData','raster','scpSettings',"-v7.3");
-disp(strcat('File Saved: Data\',File_name,'.mat'));
-
+if isfile(Save_String)
+    error('Use a unique savefile name.')
+else
+    save(Save_String,'scanData','raster','scpSettings',"-v7.3");
+    disp(strcat('File Saved: Data\',File_name,'.mat'));
+end

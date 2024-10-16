@@ -4,7 +4,7 @@ clear all
 
 %% Load Data
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'RingArrayScan10';
+file_name = 'DIYMk1Test5';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')

@@ -1,7 +1,8 @@
 %% Peak Voltage Analysis
-% For reference: scanData = [x,y,z,samples,channel];
+% For reference: scanData = [x,y,z,samples,channel,nrepeats];
 clear all
 
+analysisVersion = 0;
 %% Load Data
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
 file_name = 'DIYMk1Test24';
@@ -9,27 +10,43 @@ path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
 disp(scpSettings.timestamp)
+if analysisVersion == 0
+    disp('Skipping compatability check. Data dimensions may be incompatible with requested plots.')
+elseif analysisVersion ~= scpSettings.scanVersion
+    warning("Scan and analysis programs have mismatched versions.")
+end
 % check size of data array - note whether one or two channel
 disp('Data Size:')
 disp(size(scanData))
 
-%% Check Waveform and Extract Peak Voltages
-x_index = 1;
-y_index = 1;
-z_index = 1;
+%%
+% Useful Constants
+t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
+
+%% Post-Process Data
 
 pkrange = [1,60]; % us - time range to look for peak 
 pkrangeidx = pkrange*scpSettings.SampleFrequency/1e6; % corresponding array index
 
+% remove trigger (2nd) channel
+scanData_noTrigger = squeeze(scanData(:,:,:,:,1,:));
+
 % remove bias
-scanData_noBias = scanData(:,:,:,:,1) - mean(scanData(:,:,:,:,1),4);
+scanData_noBias = scanData(:,:,:,:,1,:) - mean(scanData(:,:,:,:,1,:),4);
+
+% take mean & std
+[scanData_std,scanData_mean] = std(scanData_noBias,0,6);
+%% PROGRESS MARK
+
 Vpk = squeeze(max(scanData_noBias(:,:,:,pkrangeidx(1):pkrangeidx(2),1),[],4)); % max voltage at [x,y,z]
 
+%% Check Waveform 
+x_index = 1;
+y_index = 1;
+z_index = 1;
+
 pks = find(scanData_noBias(x_index,y_index,z_index,:,1) == Vpk(x_index,y_index,z_index));
-
 wvfmData = squeeze(scanData_noBias(x_index,y_index,z_index,:,1));
-
-t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
 
 figure(1)
 plot(t,wvfmData)
@@ -65,15 +82,12 @@ addlistener(slider, 'Value', 'PostSet', @(~,~) updatePlot(MPa,round(slider.Value
 
 %%
 figure(4)
-isosurface(MPa,0);
-hold on
-isosurface(MPa,0.5)
-isosurface(MPa,0.75)
-hold off
-legend('0MPa','0.5MPa','0.75MPa')
-
-%%
 isosurface(smooth3(MPa,"box",3))
+xlabel('x (mm)')
+ylabel('y (mm)')
+zlabel('z(mm)')
+title('Pressure Isosurface')
+
 %% functions
 
 % Update Plot Function

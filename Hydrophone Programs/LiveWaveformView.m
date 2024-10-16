@@ -107,8 +107,8 @@ disp(scp.SampleFrequency/1e6)
 disp(record_time*1e6)
 
 %%
-refreshRate = 30; % seconds
-maxRunTime = 120*60; % seconds
+refreshRate = 1; % seconds
+maxRunTime = 15*60; % seconds
 saveData.data = zeros(maxRunTime/refreshRate,scpSettings.RecordLength); % counter,wvfm
 saveData.timestamps = zeros(1,maxRunTime/refreshRate);
 
@@ -129,8 +129,7 @@ while run == 1
     wvfm = measurement(:,1);
     trigger = measurement(:,2);
     t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
-
-    
+   
     figure(1)
     plot(t,noBias(wvfm))
     %hold on
@@ -156,7 +155,7 @@ end
 %%
 
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'RingArray2HrsPostCooldown'; % CHECK
+File_name = 'test'; % CHECK
 Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'saveData','scpSettings',"-v7.3");
 disp(strcat('File Saved: Data\',File_name,'.mat'));

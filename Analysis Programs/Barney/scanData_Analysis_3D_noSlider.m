@@ -14,9 +14,9 @@ disp('Data Size:')
 disp(size(scanData))
 
 %% Check Waveform and Extract Peak Voltages
-x_index = 1;
-y_index = 1;
-z_index = 1;
+x_index = 8;
+y_index = 3;
+z_index = 40;
 
 pkrange = [1,60]; % us - time range to look for peak 
 pkrangeidx = pkrange*scpSettings.SampleFrequency/1e6; % corresponding array index
@@ -45,46 +45,33 @@ hold off
 xline(pkrange)
 xline(t(pks),'--r')
 
+
+%% plot Vpk(x,y) at different z 
+% Check axes orientation
+nZs = length(raster.zs);
+figure(1)
+for i = 1:nZs
+    subplot(6,6,i)
+    imagesc(raster.xs,raster.ys,squeeze(Vpk(:,:,i)))
+    colorbar
+    xlabel('x (mm)')
+    ylabel('y (mm)')
+    title(string(raster.zs(i)))
+    %clim([0,0.1])
+end
+
 %% To MPa
 mVperMPa = 153.23; % CHECK
 MPa = Vpk*1e3/mVperMPa; 
-figure(10)
-imagesc(raster.xs, flip(raster.ys), rot90(MPa(:,:,z_index)))
+
+figure(2)
+imagesc(raster.xs,flip(raster.ys),rot90(MPa(:,:,z_index)))
 axis image;
-set(gca, 'YDir', 'normal')
-a = colorbar;
+set(gca,'YDir','normal') % rot90, flip to get stage coords to match image
+a=colorbar;
 a.Label.String = 'MPa';
 xlabel('x (mm)')
 ylabel('y (mm)')
-title(strcat('z= ', string(raster.zs(z_index)), 'mm'))
+title(strcat('z= ',string(raster.zs),'mm'))
+%clim([0.1,0.8])
 
-% Add Slider
-nZs = length(raster.zs);
-slider = uicontrol('Style', 'slider', 'Min', 1, 'Max', nZs, 'Value', z_index, 'Position', [20 20 200 20]);
-addlistener(slider, 'Value', 'PostSet', @(~,~) updatePlot(MPa,round(slider.Value), raster));
-
-%%
-figure(4)
-isosurface(MPa,0);
-hold on
-isosurface(MPa,0.5)
-isosurface(MPa,0.75)
-hold off
-legend('0MPa','0.5MPa','0.75MPa')
-
-%%
-isosurface(smooth3(MPa,"box",3))
-%% functions
-
-% Update Plot Function
-function updatePlot(MPa,z_index, raster)
-    figure(10)
-    imagesc(raster.xs, flip(raster.ys), rot90(MPa(:,:,z_index)))
-    axis image;
-    set(gca, 'YDir', 'normal')
-    a = colorbar;
-    a.Label.String = 'MPa';
-    xlabel('x (mm)')
-    ylabel('y (mm)')
-    title(strcat('z= ', string(raster.zs(z_index)), 'mm'))
-end
