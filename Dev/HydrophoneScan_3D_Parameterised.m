@@ -6,6 +6,14 @@ close all;
 clc;
 fclose all;
 
+%% Load Inputs
+Input = load('ScanParametersTest');
+scpSettings.scanVersion = 1;
+
+if Input.inputVersion ~= scpSettings.scanVersion
+    error('Incompatible version')
+end
+
 %% Connect to HandyScope
 disp('Connecting to HandyScope...')
 % Open LibTiePie and display library info if not yet opened:
@@ -45,15 +53,15 @@ if exist('scp', 'var')
     scp.MeasureMode = 2; % Block Mode
 
     % Set sample frequency:
-    MHz = 50;     % CHECK
+    MHz = Input.MHz;     % CHECK
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    record_time = 0.1/1e3; % seconds                % CHECK
+    record_time = Input.record_time; % seconds                % CHECK
     scp.RecordLength = scp.SampleFrequency*record_time; % n Samples: max = 33553920 ~ 3e7 (67107840?)    
 
     % Set pre sample ratio:
-    scp.PreSampleRatio = 0; 
+    scp.PreSampleRatio = Input.scp.PreSampleRatio; 
 
     % For all channels:
     for ch = scp.Channels
@@ -69,7 +77,7 @@ if exist('scp', 'var')
     
     % Trigger settings
     % Set trigger timeout: 
-    scp.TriggerTimeOut = 5 * 1e-3; % ms -> Long delay to indicate trigger not found
+    scp.TriggerTimeOut = Input.scp.TriggerTimeOut; % ms -> Long delay to indicate trigger not found
     
     % Disable all channel trigger sources:
     for ch = scp.Channels
@@ -89,8 +97,8 @@ if exist('scp', 'var')
     clear chTr;
     
     % Set range on each channel (V)
-    scp.Channels(1).Range = 2 ;     % CHECK
-    scp.Channels(2).Range = 5 ;     % CHECK
+    scp.Channels(1).Range = Input.scp.Channels(1).Range ;     % CHECK
+    scp.Channels(2).Range = Input.scp.Channels(2).Range ;     % CHECK
     
     else
     warning('No Scope Detected')
@@ -98,13 +106,12 @@ end
 
 scpSettings.RecordLength = scp.RecordLength;
 scpSettings.SampleFrequency = scp.SampleFrequency;
-scpSettings.nRepeats = 5;           % CHECK
+scpSettings.nRepeats = Input.scpSettings.nRepeats;           % CHECK
 scpSettings.timestamp = datetime;
-scpSettings.scanVersion = 1;
 
 disp(strcat('Record time per measurement:',string(record_time*1e6),'us.'))
 
-disp('scp.SampleFrequency & redord time [MHz,us]:')
+disp('scp.SampleFrequency & record time [MHz,us]:')
 disp(scp.SampleFrequency/1e6)
 disp(record_time*1e6)
 
@@ -119,7 +126,7 @@ end
 import zaber.motion.ascii.Connection;
 import zaber.motion.Units;
 
-connection = Connection.openSerialPort('COM5');                         %CHECK
+connection = Connection.openSerialPort(Input.serialPort);                          %CHECK
 try
     connection.enableAlerts();
 
@@ -146,30 +153,13 @@ try
 % Use scanVolumeChecker to quickly make sure that the raster parameters are
 % correct without having to boot up HandyScope each time.#
 
-ymin = 26;
-ymax = 33;
-xmin = 20;
-xmax = 28;
-zmin = 30;
-zmax = 30;
 
-xhome = mean([xmin,xmax]);
-yhome = mean([ymin,ymax]);
-zhome = mean([zmin,zmax]);
+raster.home = Input.raster.home; % home position [x,y,x] in mm     % CHECK
+raster.size = Input.raster.size; % [X,Y,Z] in mm                      % CHECK
 
-xsize = xmax - xmin;
-ysize = ymax-ymin;
-zsize = zmax-zmin;
+raster.step = Input.raster.step; % [dx,dy,dx] mm - must be greater than zero          % CHECK
 
-raster.home = [xhome,yhome,zhome]; % home position [x,y,x] in mm     % CHECK
-raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
-
-%raster.home = [23.75,27,20]; % home position [x,y,x] in mm     % CHECK
-%raster.size = [10 0 40]; % [X,Y,Z] in mm                      % CHECK
-
-raster.step = [0.25,0.25,0.25]; % [dx,dy,dx] mm - must be greater than zero          % CHECK
-
-raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
+raster.pause_time = Input.raster.pause_time; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
 raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step(1) : (raster.home(1) + 0.5*(raster.size(1))) ;
 raster.ys = (raster.home(2) - 0.5*(raster.size(2))) : raster.step(2) : (raster.home(2) + 0.5*(raster.size(2))) ;
@@ -178,10 +168,6 @@ raster.zs = (raster.home(3) - 0.5*(raster.size(3))) : raster.step(3) : (raster.h
 raster.xlims = [min(raster.xs),max(raster.xs)];
 raster.ylims = [min(raster.ys),max(raster.ys)];
 raster.zlims = [min(raster.zs),max(raster.zs)];
-
-raster.relxs = raster.xs - raster.home(1);
-raster.relys = raster.ys - raster.home(2);
-raster.relzs = -(raster.zs - raster.home(3)); % flip z-axis
 
 disp('rater.home/size/step:')
 disp(raster.home)
@@ -211,8 +197,6 @@ if min(raster.home - raster.size/2) < 0
 elseif min(raster.home - raster.size/2) == 0
     warning('RASTER LIMIT = AXIS LIMIT')
 end
-
-%traceScanVolume(xAxis,yAxis,zAxis,raster) % Optional scan volume check
 
 %% Make scan snake
 % Define the array to store the coordinates
@@ -307,11 +291,6 @@ for n = 1: NPoints
 
 end
 
-% Return to home
-xAxis.moveAbsolute(raster.home(1), Units.LENGTH_MILLIMETRES)
-yAxis.moveAbsolute(raster.home(2), Units.LENGTH_MILLIMETRES)
-zAxis.moveAbsolute(raster.home(3), Units.LENGTH_MILLIMETRES)
-
 connection.close();
 catch exception
     connection.close();
@@ -326,8 +305,8 @@ disp('Scan Complete');
 %% Saving results
 
 disp('Saving...');
-File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'repeats_test'; % CHECK
+File_loc = Input.File_loc; % CHECK
+File_name = Input.File_name; % CHECK
 
 Save_String=strcat(File_loc,File_name,'.mat');
 if isfile(Save_String)

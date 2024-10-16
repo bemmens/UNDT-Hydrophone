@@ -2,10 +2,10 @@
 % For reference: scanData = [x,y,z,samples,channel,nrepeats];
 clear all
 
-analysisVersion = 0;
+analysisVersion = 1
 %% Load Data
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'DIYMk1Test24';
+file_name = 'repeats_test';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')

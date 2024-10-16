@@ -168,9 +168,9 @@ raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 %raster.step = [0.25,0.25,0.2]; % [dx,dy,dx] mm - must be greater than zero          % CHECK
 
 raster.home = [23.75,27,20]; % home position [x,y,x] in mm     % CHECK
-raster.size = [10 0 40]; % [X,Y,Z] in mm                      % CHECK
+raster.size = [5 5 5]; % [X,Y,Z] in mm                      % CHECK
 
-raster.step = [0.25,0.25,0.25]; % [dx,dy,dx] mm - must be greater than zero          % CHECK
+raster.step = [2,2,2]; % [dx,dy,dx] mm - must be greater than zero          % CHECK
 
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
@@ -330,7 +330,7 @@ disp('Scan Complete');
 
 disp('Saving...');
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'DIYMk1Test26'; % CHECK
+File_name = 'test'; % CHECK
 
 Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'scanData','raster','scpSettings',"-v7.3");
