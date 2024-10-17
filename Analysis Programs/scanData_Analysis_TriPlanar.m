@@ -16,15 +16,6 @@ if analysisVersion == 0
 elseif analysisVersion ~= scpSettings.scanVersion
     warning("Scan and analysis programs have mismatched versions.")
 end
-% check size of data array - note whether one or two channel
-%{
-disp('Data Size XY:')
-disp(size(scanData.XY))
-disp('Data Size YZ :')
-disp(size(scanData.YZ))
-disp('Data Size XZ:')
-disp(size(scanData.XZ))
-%}
 
 %%
 % Useful Constants
@@ -54,15 +45,12 @@ Vpk.XY = squeeze(max(scanData_mean.XY(:,:,pkrangeidx(1):pkrangeidx(2)),[],3)); %
 Vpk.YZ = squeeze(max(scanData_mean.YZ(:,:,pkrangeidx(1):pkrangeidx(2)),[],3)); % max voltage at [x,y,z0]
 Vpk.XZ = squeeze(max(scanData_mean.XZ(:,:,pkrangeidx(1):pkrangeidx(2)),[],3)); % max voltage at [x,y,z0]
 
-%{ 
-
-%Check Waveform 
+%% Check Waveform 
 x_index = 1;
 y_index = 1;
-z_index = 1;
 
-pks = find(scanData_noBias(x_index,y_index,z_index,:,1) == Vpk(x_index,y_index,z_index));
-wvfmData = squeeze(scanData_noBias(x_index,y_index,z_index,:,1));
+pks = find(scanData_mean.XY(x_index,y_index,:,1) == Vpk.XY(x_index,y_index));
+wvfmData = squeeze(scanData_noBias.XY(x_index,y_index,:,1));
 
 figure(1)
 plot(t,wvfmData)
@@ -70,15 +58,14 @@ plot(t,wvfmData)
 hold on
 x = raster.xs(x_index);
 y = raster.ys(y_index);
-z = raster.zs(z_index);
-title(strcat('Waveform at [x,y,z]=[',string(x),',',string(y),',',string(z),'] mm'))
+z = raster.home(3);
+title(strcat('Raw Data at [x,y,z] = [',string(x),', ',string(y),', ',string(z),'] mm'))
 xlabel('Time [us]');
 ylabel('Amplitude [V]');
 hold off
 xline(pkrange)
 xline(t(pks),'--r')
-
-%}
+legend('Waveform','pkrange min','pkrange max','Vpk')
 
 %% To MPa
 mVperMPa = 153.23; % CHECK
@@ -87,7 +74,7 @@ MPa.YZ = Vpk.YZ*1e3/mVperMPa;
 MPa.XZ = Vpk.XZ*1e3/mVperMPa; 
 
 %% Plot 3D orthogonal views - CoPilot
-figure(11)
+figure(2)
 hold on
 
 % XY plane
@@ -110,7 +97,7 @@ cb.Label.String = 'Pressure (MPa)';
 xlabel('x (mm)')
 ylabel('y (mm)')
 zlabel('z (mm)')
-title('Tri-Planaer Scan of Acoustic Field')
+title('Tri-Planar Scan of Acoustic Field')
 view(3)
 axis vis3d
 hold off
