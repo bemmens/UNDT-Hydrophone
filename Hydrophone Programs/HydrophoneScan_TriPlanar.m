@@ -8,11 +8,15 @@ fclose all;
 
 %% Check Savefile
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'tri_planar_test'; % CHECK
+File_name = 'DIYMK1_30'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 if isfile(Save_String)
-    error('Use a unique savefile name.')
+    warning('Use a unique savefile name.')
+    check = input('Continue anyway? [Enter = Yes / 0 = No:');
+    if check == 0
+        error('Canceled')
+    end
 end
 
 %% Connect to HandyScope
@@ -154,11 +158,29 @@ try
 
 %% DEFINE raster
 % Use scanVolumeChecker to quickly make sure that the raster parameters are
-% correct without having to boot up HandyScope each time.#
+% correct without having to boot up HandyScope each time.
 
-raster.home = [23.75,27,20]; % home position [x,y,x] in mm     % CHECK
-raster.size = [5 5 5]; % [X,Y,Z] in mm                      % CHECK
-raster.step = [1,1,1]; % [dx,dy,dx] mm - must be greater than zero          % CHECK
+ymin = 15;
+ymax = 35;
+xmin = 15;
+xmax = 30;
+zmin = 0;
+zmax = 20;
+
+xhome = mean([xmin,xmax]);
+yhome = mean([ymin,ymax]);
+zhome = mean([zmin,zmax]);
+
+xsize = xmax - xmin;
+ysize = ymax-ymin;
+zsize = zmax-zmin;
+
+raster.home = [xhome,yhome,zhome]; % home position [x,y,x] in mm     % CHECK
+raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
+
+%raster.home = [25,25,20]; % home position [x,y,x] in mm     % CHECK
+%raster.size = [50 50 40]; % [X,Y,Z] in mm                      % CHECK
+raster.step = [0.25,0.25,0.25]; % [dx,dy,dx] mm - must be greater than zero          % CHECK
 
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
@@ -286,6 +308,9 @@ for n = 1: NPointsXY
     if snakeCoords.XY(n,2) ~= oldCoords(2)
         yAxis.moveAbsolute(snakeCoords.XY(n,2), Units.LENGTH_MILLIMETRES)
     end
+    if snakeCoords.XY(n,3) ~= oldCoords(3)
+        zAxis.moveAbsolute(snakeCoords.XY(n,3), Units.LENGTH_MILLIMETRES)
+    end
 
     pause(raster.pause_time) % can tweak this to speed up or slow down scan: risk of shaky sensor
 
@@ -321,6 +346,9 @@ for n = 1: NPointsYZ
     
     % Move Sensor
     % Only engage axis if position has changed
+    if snakeCoords.YZ(n,1) ~= oldCoords(1)
+        xAxis.moveAbsolute(snakeCoords.YZ(n,1), Units.LENGTH_MILLIMETRES)
+    end
     if snakeCoords.YZ(n,2) ~= oldCoords(2)
         yAxis.moveAbsolute(snakeCoords.YZ(n,2), Units.LENGTH_MILLIMETRES)
     end
@@ -363,7 +391,10 @@ for n = 1: NPointsXZ
     % Move Sensor
     % Only engage axis if position has changed
     if snakeCoords.XZ(n,1) ~= oldCoords(1)
-        xAxis.moveAbsolute(snakeCoords.XY(n,1), Units.LENGTH_MILLIMETRES)
+        xAxis.moveAbsolute(snakeCoords.XZ(n,1), Units.LENGTH_MILLIMETRES)
+    end
+    if snakeCoords.XZ(n,2) ~= oldCoords(2)
+        yAxis.moveAbsolute(snakeCoords.XZ(n,2), Units.LENGTH_MILLIMETRES)
     end
     if snakeCoords.XZ(n,3) ~= oldCoords(3)
         zAxis.moveAbsolute(snakeCoords.XZ(n,3), Units.LENGTH_MILLIMETRES)
@@ -411,5 +442,5 @@ disp('Scan Complete');
 %% Saving results
 
 disp('Saving...');
-save(Save_String,'scanData','raster','scpSettings',"-v7.3");
+save(Save_String,'scanData','raster','scpSettings','snakeCoords',"-v7.3");
 disp(strcat('File Saved: Data\',File_name,'.mat'));

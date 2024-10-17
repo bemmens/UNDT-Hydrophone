@@ -6,7 +6,7 @@ analysisVersion = 2;
 
 %% Load Data
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'tri_planar_test';
+file_name = 'DIYMK1_30';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -23,7 +23,7 @@ t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
 
 %% Post-Process Data
 
-pkrange = [1,60]; % us - time range to look for peak 
+pkrange = [1,100]; % us - time range to look for peak 
 pkrangeidx = pkrange*scpSettings.SampleFrequency/1e6; % corresponding array index
 
 % remove trigger (2nd) channel
@@ -46,16 +46,18 @@ Vpk.YZ = squeeze(max(scanData_mean.YZ(:,:,pkrangeidx(1):pkrangeidx(2)),[],3)); %
 Vpk.XZ = squeeze(max(scanData_mean.XZ(:,:,pkrangeidx(1):pkrangeidx(2)),[],3)); % max voltage at [x,y,z0]
 
 %% Check Waveform 
-x_index = 1;
-y_index = 1;
+x_index = 13;
+y_index = 13;
 
 pks = find(scanData_mean.XY(x_index,y_index,:,1) == Vpk.XY(x_index,y_index));
-wvfmData = squeeze(scanData_noBias.XY(x_index,y_index,:,1));
+wvfmData_raw = squeeze(scanData_noBias.XY(x_index,y_index,:,1));
+wvfmData_mean = squeeze(scanData_mean.XY(x_index,y_index,:));
 
 figure(1)
-plot(t,wvfmData)
-%xlim([0,200])
+plot(t,wvfmData_raw)
 hold on
+plot(t,wvfmData_mean)
+%xlim([0,200])
 x = raster.xs(x_index);
 y = raster.ys(y_index);
 z = raster.home(3);
@@ -65,7 +67,7 @@ ylabel('Amplitude [V]');
 hold off
 xline(pkrange)
 xline(t(pks),'--r')
-legend('Waveform','pkrange min','pkrange max','Vpk')
+legend('Raw Waveform','Mean waveform','pkrange min','pkrange max','Vpk')
 
 %% To MPa
 mVperMPa = 153.23; % CHECK
@@ -78,19 +80,19 @@ figure(2)
 hold on
 
 % XY plane
-[X, Y] = meshgrid(raster.xs, raster.ys);
-Z = ones(size(X)) * raster.home(3);
-surf(X, Y, Z, MPa.XY, 'EdgeColor', 'none')
+[X1, Y1] = meshgrid(raster.xs, raster.ys);
+Z1 = ones(size(X1)) * raster.home(3);
+surf(X1, Y1, Z1, MPa.XY', 'EdgeColor', 'none')
 
 % YZ plane
-[Y, Z] = meshgrid(raster.ys, raster.zs);
-X = ones(size(Y)) * raster.home(1);
-surf(X, Y, Z, MPa.YZ, 'EdgeColor', 'none')
+[Y2, Z2] = meshgrid(raster.ys, raster.zs);
+X2 = ones(size(Y2)) * raster.home(1);
+surf(X2, Y2, Z2, MPa.YZ', 'EdgeColor', 'none')
 
 % XZ plane
-[X, Z] = meshgrid(raster.xs, raster.zs);
-Y = ones(size(X)) * raster.home(2);
-surf(X, Y, Z, MPa.XZ, 'EdgeColor', 'none')
+[X3, Z3] = meshgrid(raster.xs, raster.zs);
+Y3 = ones(size(X3)) * raster.home(2);
+surf(X3, Y3, Z3, MPa.XZ', 'EdgeColor', 'none')
 
 cb = colorbar;
 cb.Label.String = 'Pressure (MPa)';
