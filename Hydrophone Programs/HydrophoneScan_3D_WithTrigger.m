@@ -89,7 +89,7 @@ if exist('scp', 'var')
     clear chTr;
     
     % Set range on each channel (V)
-    scp.Channels(1).Range = 2 ;     % CHECK
+    scp.Channels(1).Range = 0.5 ;     % CHECK
     scp.Channels(2).Range = 5 ;     % CHECK
     
     else
@@ -144,12 +144,12 @@ try
 % Use scanVolumeChecker to quickly make sure that the raster parameters are
 % correct without having to boot up HandyScope each time.#
 
-ymin = 26;
+ymin = 15;
 ymax = 33;
-xmin = 20;
-xmax = 28;
-zmin = 30;
-zmax = 30;
+xmin = 15;
+xmax = 30;
+zmin = 0;
+zmax = 10;
 
 xhome = mean([xmin,xmax]);
 yhome = mean([ymin,ymax]);
@@ -167,10 +167,10 @@ raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
 %raster.step = [0.25,0.25,0.2]; % [dx,dy,dx] mm - must be greater than zero          % CHECK
 
-raster.home = [23.75,27,20]; % home position [x,y,x] in mm     % CHECK
-raster.size = [5 5 5]; % [X,Y,Z] in mm                      % CHECK
+%raster.home = [23.75,27,20]; % home position [x,y,x] in mm     % CHECK
+%raster.size = [5 5 5]; % [X,Y,Z] in mm                      % CHECK
 
-raster.step = [2,2,2]; % [dx,dy,dx] mm - must be greater than zero          % CHECK
+raster.step = [0.5,0.5,0.25]; % [dx,dy,dx] mm - must be greater than zero          % CHECK
 
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
@@ -330,7 +330,7 @@ disp('Scan Complete');
 
 disp('Saving...');
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'test'; % CHECK
+File_name = 'DIYMk1_Test32'; % CHECK
 
 Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'scanData','raster','scpSettings',"-v7.3");

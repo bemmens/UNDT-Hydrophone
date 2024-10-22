@@ -8,12 +8,12 @@ fclose all;
 
 %% Check Savefile
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'DIYMK1_30'; % CHECK
+File_name = 'DIYMK1_39'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 if isfile(Save_String)
     warning('Use a unique savefile name.')
-    check = input('Continue anyway? [Enter = Yes / 0 = No:');
+    check = input('Continue anyway? [Enter = Yes / 0 = No]:');
     if check == 0
         error('Canceled')
     end
@@ -62,7 +62,7 @@ if exist('scp', 'var')
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    record_time = 0.1/1e3; % seconds                % CHECK
+    record_time = 0.2/1e3; % seconds                % CHECK
     scp.RecordLength = scp.SampleFrequency*record_time; % n Samples: max = 33553920 ~ 3e7 (67107840?)    
 
     % Set pre sample ratio:
@@ -102,7 +102,7 @@ if exist('scp', 'var')
     clear chTr;
     
     % Set range on each channel (V)
-    scp.Channels(1).Range = 2 ;     % CHECK
+    scp.Channels(1).Range = 0.5 ;     % CHECK
     scp.Channels(2).Range = 5 ;     % CHECK
     
     else
@@ -112,7 +112,7 @@ end
 % Save aprameters for analysis
 scpSettings.RecordLength = scp.RecordLength;
 scpSettings.SampleFrequency = scp.SampleFrequency;
-scpSettings.nRepeats = 5;           % CHECK
+scpSettings.nRepeats = 10;           % CHECK
 scpSettings.timestamp = datetime;
 scpSettings.scanVersion = 2; % CHECK
 
@@ -160,12 +160,14 @@ try
 % Use scanVolumeChecker to quickly make sure that the raster parameters are
 % correct without having to boot up HandyScope each time.
 
-ymin = 15;
-ymax = 35;
-xmin = 15;
-xmax = 30;
+wavelength = 1.5; % in mm
+
+ymin = 0;
+ymax = 50;
+xmin = 0;
+xmax = 50;
 zmin = 0;
-zmax = 20;
+zmax = 10;
 
 xhome = mean([xmin,xmax]);
 yhome = mean([ymin,ymax]);
@@ -178,9 +180,9 @@ zsize = zmax-zmin;
 raster.home = [xhome,yhome,zhome]; % home position [x,y,x] in mm     % CHECK
 raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-%raster.home = [25,25,20]; % home position [x,y,x] in mm     % CHECK
-%raster.size = [50 50 40]; % [X,Y,Z] in mm                      % CHECK
-raster.step = [0.25,0.25,0.25]; % [dx,dy,dx] mm - must be greater than zero          % CHECK
+raster.home = [20,22.5,6]; % home position [x,y,x] in mm     % CHECK
+raster.size = [15 15 10]; % [X,Y,Z] in mm                      % CHECK
+raster.step = [0.5,0.5,0.125]*wavelength; % [dx,dy,dx] mm - must be greater than zero          % CHECK
 
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
@@ -192,10 +194,13 @@ raster.xlims = [min(raster.xs),max(raster.xs)];
 raster.ylims = [min(raster.ys),max(raster.ys)];
 raster.zlims = [min(raster.zs),max(raster.zs)];
 
-disp('rater.home/size/step:')
+NPoints = length(raster.xs)*length(raster.ys) + length(raster.ys)*length(raster.zs) + length(raster.xs)*length(raster.zs);
+
+disp('rater.home/size/step/Npoints:')
 disp(raster.home)
 disp(raster.size)
 disp(raster.step)
+disp(NPoints)
 
 cont = input('Continue? [Yes = enter, No = 0]:');
 if cont == 0
@@ -223,8 +228,6 @@ end
 
 
 %% Define Scan Sequence
-NPoints = length(raster.xs)*length(raster.ys) + length(raster.ys)*length(raster.zs) + length(raster.xs)*length(raster.zs);
-
 snakeCoords.XY = zeros(length(raster.xs)*length(raster.ys),3);
 snakeCoords.YZ = zeros(length(raster.ys)*length(raster.zs),3);
 snakeCoords.XZ = zeros(length(raster.xs)*length(raster.zs),3);

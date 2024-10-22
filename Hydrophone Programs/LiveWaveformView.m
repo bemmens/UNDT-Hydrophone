@@ -107,8 +107,8 @@ disp(scp.SampleFrequency/1e6)
 disp(record_time*1e6)
 
 %%
-refreshRate = 1; % seconds
-maxRunTime = 15*60; % seconds
+refreshRate = 0.25; % seconds
+maxRunTime = 1*60; % seconds
 saveData.data = zeros(maxRunTime/refreshRate,scpSettings.RecordLength); % counter,wvfm
 saveData.timestamps = zeros(1,maxRunTime/refreshRate);
 
@@ -139,7 +139,7 @@ while run == 1
     ylabel('Voltage [V]');
     %xlim([17.5,32.5])
     ymax = max(wvfm);
-    ylim([-ymax*1.1,ymax*1.1])
+    %ylim([-ymax*1.1,ymax*1.1])
     title(strcat('Elapsed Time:',string(elapsedTime),'s'))
 
     saveData.data(counter,:) = measurement(:,1);
@@ -155,7 +155,7 @@ end
 %%
 
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'test'; % CHECK
+File_name = 'DIYMK1_36p5'; % CHECK
 Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'saveData','scpSettings',"-v7.3");
 disp(strcat('File Saved: Data\',File_name,'.mat'));

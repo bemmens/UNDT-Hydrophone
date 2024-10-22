@@ -6,7 +6,7 @@ analysisVersion = 2;
 
 %% Load Data
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'DIYMK1_30';
+file_name = 'DIYMK1_32';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -45,13 +45,19 @@ Vpk.XY = squeeze(max(scanData_mean.XY(:,:,pkrangeidx(1):pkrangeidx(2)),[],3)); %
 Vpk.YZ = squeeze(max(scanData_mean.YZ(:,:,pkrangeidx(1):pkrangeidx(2)),[],3)); % max voltage at [x,y,z0]
 Vpk.XZ = squeeze(max(scanData_mean.XZ(:,:,pkrangeidx(1):pkrangeidx(2)),[],3)); % max voltage at [x,y,z0]
 
+%% To MPa
+mVperMPa = 153.23; % CHECK
+MPa.XY = Vpk.XY*1e3/mVperMPa; 
+MPa.YZ = Vpk.YZ*1e3/mVperMPa; 
+MPa.XZ = Vpk.XZ*1e3/mVperMPa; 
+
 %% Check Waveform 
-x_index = 13;
-y_index = 13;
+x_index = 10;
+y_index = 19;
 
 pks = find(scanData_mean.XY(x_index,y_index,:,1) == Vpk.XY(x_index,y_index));
-wvfmData_raw = squeeze(scanData_noBias.XY(x_index,y_index,:,1));
-wvfmData_mean = squeeze(scanData_mean.XY(x_index,y_index,:));
+wvfmData_raw = squeeze(scanData_noBias.XY(x_index,y_index,:,1))*1e3/mVperMPa;
+wvfmData_mean = squeeze(scanData_mean.XY(x_index,y_index,:))*1e3/mVperMPa;
 
 figure(1)
 plot(t,wvfmData_raw)
@@ -63,17 +69,17 @@ y = raster.ys(y_index);
 z = raster.home(3);
 title(strcat('Raw Data at [x,y,z] = [',string(x),', ',string(y),', ',string(z),'] mm'))
 xlabel('Time [us]');
-ylabel('Amplitude [V]');
+ylabel('Amplitude [MPa]');
 hold off
 xline(pkrange)
 xline(t(pks),'--r')
 legend('Raw Waveform','Mean waveform','pkrange min','pkrange max','Vpk')
 
-%% To MPa
-mVperMPa = 153.23; % CHECK
-MPa.XY = Vpk.XY*1e3/mVperMPa; 
-MPa.YZ = Vpk.YZ*1e3/mVperMPa; 
-MPa.XZ = Vpk.XZ*1e3/mVperMPa; 
+%% Coords relative to plot
+
+relX = raster.xs - raster.home(1);
+relY = raster.ys - raster.home(2);
+relZ = flip(raster.zs - raster.home(3));
 
 %% Plot 3D orthogonal views - CoPilot
 figure(2)
@@ -99,9 +105,48 @@ cb.Label.String = 'Pressure (MPa)';
 xlabel('x (mm)')
 ylabel('y (mm)')
 zlabel('z (mm)')
+%xlim([15,30])
+%ylim([15,33])
 title('Tri-Planar Scan of Acoustic Field')
+subtitle('Stage Coordinates')
 view(3)
 axis vis3d
 hold off
+rotate3d
+
+%% Plot 3D orthogonal views - Relative to scan centre
+figure(3)
+hold on
+
+% XY plane
+[X1, Y1] = meshgrid(relX, relY);
+Z1 = zeros(size(X1));
+surf(X1, Y1, Z1, MPa.XY', 'EdgeColor', 'none')
+
+% YZ plane
+[Y2, Z2] = meshgrid(relY, relZ);
+X2 = zeros(size(Y2));
+surf(X2, Y2, Z2, MPa.YZ', 'EdgeColor', 'none')
+
+% XZ plane
+[X3, Z3] = meshgrid(relX, relZ);
+Y3 = zeros(size(X3));
+surf(X3, Y3, Z3, MPa.XZ', 'EdgeColor', 'none')
+
+cb = colorbar;
+cb.Label.String = 'Pressure (MPa)';
+xlabel('x (mm)')
+ylabel('y (mm)')
+zlabel('z (mm)')
+%xlim([15,30])
+%ylim([15,33])
+title('Tri-Planar Scan of Acoustic Field')
+subtitle('Scan Coordinates')
+view(3)
+axis vis3d
+hold off
+rotate3d
+
+
 
 
