@@ -8,7 +8,7 @@ fclose all;
 
 %% Check Savefile
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'DIYMK1_39'; % CHECK
+File_name = 'PDMount_Test1'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 if isfile(Save_String)
@@ -180,9 +180,9 @@ zsize = zmax-zmin;
 raster.home = [xhome,yhome,zhome]; % home position [x,y,x] in mm     % CHECK
 raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-raster.home = [20,22.5,6]; % home position [x,y,x] in mm     % CHECK
-raster.size = [15 15 10]; % [X,Y,Z] in mm                      % CHECK
-raster.step = [0.5,0.5,0.125]*wavelength; % [dx,dy,dx] mm - must be greater than zero          % CHECK
+raster.home = [25,25,20]; % home position [x,y,x] in mm     % CHECK
+raster.size = [30 30 40]; % [X,Y,Z] in mm                      % CHECK
+raster.step = [1/2,1/2,1/2]*wavelength; % [dx,dy,dx] mm - must be greater than zero          % CHECK
 
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 

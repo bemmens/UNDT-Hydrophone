@@ -74,6 +74,7 @@ legend('0MPa','0.5MPa','0.75MPa')
 
 %%
 isosurface(smooth3(MPa,"box",3))
+
 %% functions
 
 % Update Plot Function

@@ -51,7 +51,7 @@ raster.home = [xhome,yhome,zhome]; % home position [x,y,x] in mm     % CHECK
 raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
 raster.home = [25,25,20]; % home position [x,y,x] in mm     % CHECK
-raster.size = [50,50,40]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
+raster.size = [30,30,40]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
 
 raster.step = [1,1,10]; % mm  [dx,dy,dz]                      % CHECK
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK

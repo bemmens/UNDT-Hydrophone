@@ -6,7 +6,7 @@ analysisVersion = 2;
 
 %% Load Data
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'DIYMK1_32';
+file_name = 'PDMount_Test1';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -23,7 +23,7 @@ t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
 
 %% Post-Process Data
 
-pkrange = [1,100]; % us - time range to look for peak 
+pkrange = [1,200]; % us - time range to look for peak 
 pkrangeidx = pkrange*scpSettings.SampleFrequency/1e6; % corresponding array index
 
 % remove trigger (2nd) channel
