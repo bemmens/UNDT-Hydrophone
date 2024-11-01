@@ -1,5 +1,5 @@
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'DIYMK1_36p5'; % CHECK
+File_name = 'Impulsonic_Live_1'; % CHECK
 Save_String=strcat(File_loc,File_name,'.mat');
 load(Save_String)
 

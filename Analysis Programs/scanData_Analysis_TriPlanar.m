@@ -5,8 +5,8 @@ clear all
 analysisVersion = 2;
 
 %% Load Data
-folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'PDMount_Test1';
+folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\Impulsonic\';
+file_name = 'Impulsonic_7';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -23,7 +23,7 @@ t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
 
 %% Post-Process Data
 
-pkrange = [1,200]; % us - time range to look for peak 
+pkrange = [1,100]; % us - time range to look for peak 
 pkrangeidx = pkrange*scpSettings.SampleFrequency/1e6; % corresponding array index
 
 % remove trigger (2nd) channel
@@ -41,6 +41,10 @@ scanData_noBias.XZ = scanData_noTrigger.XZ - mean(scanData_noTrigger.XZ,3);
 [scanData_std.YZ,scanData_mean.YZ] = std(scanData_noBias.YZ,0,4);
 [scanData_std.XZ,scanData_mean.XZ] = std(scanData_noBias.XZ,0,4);
 
+Vmean.XY = squeeze(mean(abs(scanData_mean.XY(:,:,pkrangeidx(1):pkrangeidx(2))),3));
+Vmean.YZ = squeeze(mean(abs(scanData_mean.YZ(:,:,pkrangeidx(1):pkrangeidx(2))),3));
+Vmean.XZ = squeeze(mean(abs(scanData_mean.XZ(:,:,pkrangeidx(1):pkrangeidx(2))),3));
+
 Vpk.XY = squeeze(max(scanData_mean.XY(:,:,pkrangeidx(1):pkrangeidx(2)),[],3)); % max voltage at [x,y,z0]
 Vpk.YZ = squeeze(max(scanData_mean.YZ(:,:,pkrangeidx(1):pkrangeidx(2)),[],3)); % max voltage at [x,y,z0]
 Vpk.XZ = squeeze(max(scanData_mean.XZ(:,:,pkrangeidx(1):pkrangeidx(2)),[],3)); % max voltage at [x,y,z0]
@@ -51,9 +55,13 @@ MPa.XY = Vpk.XY*1e3/mVperMPa;
 MPa.YZ = Vpk.YZ*1e3/mVperMPa; 
 MPa.XZ = Vpk.XZ*1e3/mVperMPa; 
 
+MPa.XY = Vmean.XY*1e3/mVperMPa; 
+MPa.YZ = Vmean.YZ*1e3/mVperMPa; 
+MPa.XZ = Vmean.XZ*1e3/mVperMPa; 
+
 %% Check Waveform 
-x_index = 10;
-y_index = 19;
+x_index = 1;
+y_index = 1;
 
 pks = find(scanData_mean.XY(x_index,y_index,:,1) == Vpk.XY(x_index,y_index));
 wvfmData_raw = squeeze(scanData_noBias.XY(x_index,y_index,:,1))*1e3/mVperMPa;
@@ -74,6 +82,7 @@ hold off
 xline(pkrange)
 xline(t(pks),'--r')
 legend('Raw Waveform','Mean waveform','pkrange min','pkrange max','Vpk')
+xlim([0,10])
 
 %% Coords relative to plot
 

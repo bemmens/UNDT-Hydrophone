@@ -9,8 +9,8 @@ fclose all;
 scpSettings.scanVersion = '3D'; % CHECK
 
 %% Check Savefile
-File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'PDMount_Test1'; % CHECK
+File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\Immasonic\'; % CHECK
+File_name = 'Impulsonic_4'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 if isfile(Save_String)
@@ -64,7 +64,7 @@ if exist('scp', 'var')
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    record_time = 500/1e6; % seconds                % CHECK
+    record_time = 100/1e6; % seconds                % CHECK
     scp.RecordLength = scp.SampleFrequency*record_time; % n Samples: max = 33553920 ~ 3e7 (67107840?)    
 
     % Set pre sample ratio:
@@ -104,7 +104,7 @@ if exist('scp', 'var')
     clear chTr;
     
     % Set range on each channel (V)
-    scp.Channels(1).Range = 2 ;     % CHECK
+    scp.Channels(1).Range = 1 ;     % CHECK
     
     else
     warning('No Scope Detected')
@@ -159,11 +159,11 @@ try
 % Use scanVolumeChecker to quickly make sure that the raster parameters are
 % correct without having to boot up HandyScope each time.#
 
-wavelength = 1.48; % in mm
+wavelength = 0.657; % in mm
 
-raster.home = [25,25,25]; % home position [x,y,x] in mm     % CHECK
-raster.size = [1,1,1]; % [X,Y,Z] in mm                      % CHECK
-raster.step = [1,1,1]*wavelength; % [dx,dy,dx] mm - must be greater than zero          % CHECK
+raster.home = [25,25,30]; % home position [x,y,x] in mm     % CHECK
+raster.size = [0,0,20]; % [X,Y,Z] in mm                      % CHECK
+raster.step = [1,1,1/8]*wavelength; % [dx,dy,dx] mm - must be greater than zero          % CHECK
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
 raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step(1) : (raster.home(1) + 0.5*(raster.size(1))) ;
@@ -243,7 +243,7 @@ end
 
 %% Create results struct
 
-nRepeats = 10;
+nRepeats = 5;
 scpSettings.nRepeats = nRepeats;
 scanData = zeros(length(raster.xs),length(raster.ys),length(raster.zs),scp.RecordLength,nRepeats); % [x,y,z,wvfm,nrepeats]
 
@@ -287,7 +287,7 @@ for n = 1: NPoints
         [scp, measurement] = takeMeasOscilloscope( scp );
   
         % Store the measurement in the data array
-        scanData(i,j,k,:,r) = measurement;
+        scanData(i,j,k,:,r) = measurement(:,1);
 
     end
 

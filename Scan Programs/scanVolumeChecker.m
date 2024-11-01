@@ -32,11 +32,11 @@ try
 % make sure the full range of is movement is within the limits of the
 % apparatus
 
-ymin = 10;
-ymax = 50;
-xmin = 5;
-xmax = 45;
-zmin = 40;
+ymin = 25;
+ymax = 25;
+xmin = 25;
+xmax = 25;
+zmin = 40-20;
 zmax = 40;
 
 xhome = mean([xmin,xmax]);
@@ -50,10 +50,10 @@ zsize = zmax-zmin;
 raster.home = [xhome,yhome,zhome]; % home position [x,y,x] in mm     % CHECK
 raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-raster.home = [25,25,20]; % home position [x,y,x] in mm     % CHECK
-raster.size = [30,30,40]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
+raster.home = [25,25,30]; % home position [x,y,x] in mm     % CHECK
+raster.size = [10,30,20]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
 
-raster.step = [1,1,10]; % mm  [dx,dy,dz]                      % CHECK
+raster.step = [1,1,1]; % mm  [dx,dy,dz]                      % CHECK
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
 if min(raster.home - raster.size/2) < 0

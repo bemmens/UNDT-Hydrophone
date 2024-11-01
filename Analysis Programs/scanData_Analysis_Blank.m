@@ -2,11 +2,11 @@
 % For reference: scanData = [x,y,z,samples,channel,nrepeats];
 clear all
 
-analysisVersion = 'Blank';
+analysisVersion = '3D';
 
 %% Load Data
-folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'AmandaTest';
+folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\Immasonic\';
+file_name = 'Impulsonic_1';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -24,4 +24,18 @@ end
 
 %% Process Data
 
+t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
 
+scanData_flat = squeeze(scanData);
+scanData_mean = squeeze(mean(scanData_flat,3));
+VPk = squeeze(max(scanData_mean,[],2));
+rms = mean(abs(scanData_mean),2);
+
+%%
+figure(1)
+plot(t,scanData_mean(end,:))
+
+%%
+
+figure(2)
+plot(rms);
