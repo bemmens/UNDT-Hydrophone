@@ -55,9 +55,8 @@ _FOH Control_: Installed with wizard over USB from the hardware.
 
 This can be quite difficult to get running...
 
-May not work without the Microsoft .net Framework.
-Latest version: https://dotnet.microsoft.com/en-us/download/dotnet-framework
-version 3.5 might be better.... not sure if they conflict are both needed or just one...
+Does not work without the Microsoft .net Framework Version 3.5 Runtime.
+https://dotnet.microsoft.com/en-us/download/dotnet-framework
 
 FOH Control must be run with Admin privilages.
 
