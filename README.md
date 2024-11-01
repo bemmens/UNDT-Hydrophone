@@ -14,6 +14,7 @@ Our system is the Precision Acoustic Fibre-Optic Hydrophone Version 1, however t
 	- To clean the optical end face wipe it along the cloth of the Cletop-S fibre connector cleaner. The end face has and angle to it so you must  find the correct orientation by feel.
 	- It can be cleaned with the Neoclean but the Cletop is more convenient.
 - Our hardware runs on an older software. See the README for advice on how to install this.
+	- FOH Control must be run with admin privilages.	
 	- If all else fails and the FOH Control won’t install it is possible to update the software to the current version (for a price that was too steep at the time of writing).
 - Our older connector uses different adaptor tips on the EasyGet2. Use ….. to inspect the fibre, and ….  to inspect the socket.
 
