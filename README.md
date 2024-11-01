@@ -14,6 +14,7 @@ Our system is the Precision Acoustic Fibre-Optic Hydrophone Version 1, however t
 	- To clean the optical end face wipe it along the cloth of the Cletop-S fibre connector cleaner. The end face has and angle to it so you must  find the correct orientation by feel.
 	- It can be cleaned with the Neoclean but the Cletop is more convenient.
 - Our hardware runs on an older software. See the README for advice on how to install this.
+	- FOH Control must be run with admin privilages.	
 	- If all else fails and the FOH Control won’t install it is possible to update the software to the current version (for a price that was too steep at the time of writing).
 - Our older connector uses different adaptor tips on the EasyGet2. Use ….. to inspect the fibre, and ….  to inspect the socket.
 
@@ -48,15 +49,14 @@ _Zaber Launcher_ (or _Zaber Console_ if having compatibility problems): https://
 
 _Zaber Motion Control_: https://software.zaber.com/motion-library/docs/tutorials/install/matlab
 
-_TiePie Drivers_: https://www.tiepie.com/en/download. "WinUSB Driver"
+_TiePie Drivers_: [https://www.tiepie.com/en/download/archive](https://www.tiepie.com/en/download/archive). "TiePie USB driver 8.1.9"
 
 _FOH Control_: Installed with wizard over USB from the hardware. 
 
 This can be quite difficult to get running...
 
-May not work without the Microsoft .net Framework.
-Latest version: https://dotnet.microsoft.com/en-us/download/dotnet-framework
-version 3.5 might be better.... not sure if they conflict are both needed or just one...
+Does not work without the Microsoft .net Framework Version 3.5 Runtime.
+https://dotnet.microsoft.com/en-us/download/dotnet-framework
 
 FOH Control must be run with Admin privilages.
 
