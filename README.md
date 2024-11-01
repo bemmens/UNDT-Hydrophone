@@ -49,7 +49,7 @@ _Zaber Launcher_ (or _Zaber Console_ if having compatibility problems): https://
 
 _Zaber Motion Control_: https://software.zaber.com/motion-library/docs/tutorials/install/matlab
 
-_TiePie Drivers_: https://www.tiepie.com/en/download. "WinUSB Driver"
+_TiePie Drivers_: [https://www.tiepie.com/en/download/archive](https://www.tiepie.com/en/download/archive). "TiePie USB driver 8.1.9"
 
 _FOH Control_: Installed with wizard over USB from the hardware. 
 
