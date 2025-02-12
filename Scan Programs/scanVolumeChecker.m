@@ -3,7 +3,7 @@
 import zaber.motion.ascii.Connection;
 import zaber.motion.Units;
 
-connection = Connection.openSerialPort('COM5');                         %CHECK
+connection = Connection.openSerialPort('COM4');                         %CHECK
 try
     connection.enableAlerts();
 
@@ -50,8 +50,8 @@ zsize = zmax-zmin;
 raster.home = [xhome,yhome,zhome]; % home position [x,y,x] in mm     % CHECK
 raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-raster.home = [25,25,30]; % home position [x,y,x] in mm     % CHECK
-raster.size = [10,30,20]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
+raster.home = [20,25,20]; % home position [x,y,x] in mm     % CHECK
+raster.size = [30 30 40]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
 
 raster.step = [1,1,1]; % mm  [dx,dy,dz]                      % CHECK
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
@@ -73,7 +73,7 @@ raster.zlims = [min(raster.zs),max(raster.zs)];
 % Move to x,y centre, z bottom
 disp('Moving to raster.home [x,y,zMin] ...')
 xAxis.moveAbsolute(raster.home(1), Units.LENGTH_MILLIMETRES)
-yAxis.moveAbsolute(raster.home(1), Units.LENGTH_MILLIMETRES)
+yAxis.moveAbsolute(raster.home(2), Units.LENGTH_MILLIMETRES)
 zAxis.moveAbsolute(raster.zlims(2), Units.LENGTH_MILLIMETRES)
 
 cont = input('Continue? [Yes = enter, No = 0]:');

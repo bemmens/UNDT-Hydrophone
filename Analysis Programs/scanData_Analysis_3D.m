@@ -72,8 +72,11 @@ isosurface(MPa,0.75)
 hold off
 legend('0MPa','0.5MPa','0.75MPa')
 
-%%
+%% Isosurface
 isosurface(smooth3(MPa,"box",3))
+
+%% Scatter
+scatter3()
 
 %% functions
 

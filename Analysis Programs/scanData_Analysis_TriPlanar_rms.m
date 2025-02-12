@@ -23,7 +23,7 @@ t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
 
 %% Post-Process Data
 
-pkrange = [30,60]; % us - time range to look for peak 
+pkrange = [1,100]; % us - time range to look for peak 
 pkrangeidx = pkrange*scpSettings.SampleFrequency/1e6; % corresponding array index
 
 % remove trigger (2nd) channel
@@ -36,61 +36,67 @@ scanData_noBias.XY = scanData_noTrigger.XY - mean(scanData_noTrigger.XY,3);
 scanData_noBias.YZ = scanData_noTrigger.YZ - mean(scanData_noTrigger.YZ,3);
 scanData_noBias.XZ = scanData_noTrigger.XZ - mean(scanData_noTrigger.XZ,3);
 
-% take mean & std of repeats
-[scanData_std.XY,scanData_mean.XY] = std(scanData_noBias.XY,0,4);
-[scanData_std.YZ,scanData_mean.YZ] = std(scanData_noBias.YZ,0,4);
-[scanData_std.XZ,scanData_mean.XZ] = std(scanData_noBias.XZ,0,4);
 
-Vmean.XY = squeeze(mean(abs(scanData_mean.XY(:,:,pkrangeidx(1):pkrangeidx(2))),3));
-Vmean.YZ = squeeze(mean(abs(scanData_mean.YZ(:,:,pkrangeidx(1):pkrangeidx(2))),3));
-Vmean.XZ = squeeze(mean(abs(scanData_mean.XZ(:,:,pkrangeidx(1):pkrangeidx(2))),3));
+%% Bandpass filter 
+Fs = scpSettings.SampleFrequency; % Sampling Frequency
+F0 = 1*1e6; % Centre
+width = 0.25*1e6;
+Fpass1 = F0-width; % First Passband Frequency
+Fpass2 = F0+width; % Second Passband Frequency
 
-Vpk.XY = squeeze(max(scanData_mean.XY(:,:,pkrangeidx(1):pkrangeidx(2)),[],3)); % max voltage at [x,y,z0]
-Vpk.YZ = squeeze(max(scanData_mean.YZ(:,:,pkrangeidx(1):pkrangeidx(2)),[],3)); % max voltage at [x,y,z0]
-Vpk.XZ = squeeze(max(scanData_mean.XZ(:,:,pkrangeidx(1):pkrangeidx(2)),[],3)); % max voltage at [x,y,z0]
+% Apply the bandpass filter
+figure(1)
+bandpass(squeeze(scanData_noBias.XY(10,10,:))', [Fpass1 Fpass2], Fs)
+[~,bpfilter] = bandpass(squeeze(scanData_noBias.XY(10,10,:))', [Fpass1 Fpass2], Fs);
+
+scanData_bpf.XY = filter( bpfilter.Coefficients, 1, scanData_noBias.XY, [], 3 );
+scanData_bpf.YZ = filter( bpfilter.Coefficients, 1, scanData_noBias.YZ, [], 3 );
+scanData_bpf.XZ = filter( bpfilter.Coefficients, 1, scanData_noBias.XZ, [], 3 );
+
+figure(100)
+plot(t,squeeze(scanData_bpf.XY(10,10,:)))
+hold on
+%plot(t,squeeze(scanData_noBias.XY(10,10,:)))
+hold off
+%xlim([100,150])
+%% With nRpeats
+%Vrms.XY = mean(squeeze(rms(scanData_noBias.XY,3)),3); % rms voltage at [x,y,z0]
+%Vrms.YZ = mean(squeeze(rms(scanData_noBias.YZ,3)),3); % rms voltage at [x,y,z0]
+%Vrms.XZ = mean(squeeze(rms(scanData_noBias.XZ,3)),3); % rms voltage at [x,y,z0]
+
+Vrms.XY = squeeze(rms(scanData_bpf.XY,3)); % rms voltage at [x,y,z0]
+Vrms.YZ = squeeze(rms(scanData_bpf.YZ,3)); % rms voltage at [x,y,z0]
+Vrms.XZ = squeeze(rms(scanData_bpf.XZ,3)); % rms voltage at [x,y,z0]
 
 %% To MPa
 mVperMPa = 153.23; % CHECK
-MPa.XY = Vpk.XY*1e3/mVperMPa; 
-MPa.YZ = Vpk.YZ*1e3/mVperMPa; 
-MPa.XZ = Vpk.XZ*1e3/mVperMPa; 
-
-MPa.XY = Vmean.XY*1e3/mVperMPa; 
-MPa.YZ = Vmean.YZ*1e3/mVperMPa; 
-MPa.XZ = Vmean.XZ*1e3/mVperMPa; 
+MPa.XY = Vrms.XY*1e3/mVperMPa; 
+MPa.YZ = Vrms.YZ*1e3/mVperMPa; 
+MPa.XZ = Vrms.XZ*1e3/mVperMPa; 
 
 %% Check Waveform 
-x_index = 10;
-y_index = 10;
+x_index = 8;
+y_index = round(length(raster.ys)/2);
+z_index = 6;
 
-pks = find(scanData_mean.XY(x_index,y_index,:,1) == Vpk.XY(x_index,y_index));
-wvfmData_raw1 = squeeze(scanData_noBias.XY(x_index,y_index,:,1))*1e3/mVperMPa;
-wvfmData_raw2 = squeeze(scanData_noBias.XY(x_index,y_index,:,2))*1e3/mVperMPa;
-wvfmData_raw3 = squeeze(scanData_noBias.XY(x_index,y_index,:,3))*1e3/mVperMPa;
-wvfmData_raw4 = squeeze(scanData_noBias.XY(x_index,y_index,:,4))*1e3/mVperMPa;
-wvfmData_raw5 = squeeze(scanData_noBias.XY(x_index,y_index,:,5))*1e3/mVperMPa;
-wvfmData_mean = squeeze(scanData_mean.XY(x_index,y_index,:))*1e3/mVperMPa;
+wvfmData_raw1 = squeeze(scanData_noBias.XZ(x_index,y_index,:,1))*1e3/mVperMPa;
 
+%% Plots
 figure(1)
-plot(t,wvfmData_raw1)
+%plot(t,wvfmData_raw1)
 hold on
 %plot(t,wvfmData_raw2)
 %plot(t,wvfmData_raw3)
-%plot(t,wvfmData_raw4)
-%plot(t,wvfmData_raw5)
-plot(t,wvfmData_mean)
 %xlim([0,200])
 x = raster.xs(x_index);
 y = raster.ys(y_index);
-z = raster.home(3);
+z = raster.zs(z_index);
 title(strcat('Raw Data at [x,y,z] = [',string(x),', ',string(y),', ',string(z),'] mm'))
 xlabel('Time [us]');
 ylabel('Amplitude [MPa]');
 hold off
-xline(pkrange)
-xline(t(pks),'--r')
-legend('Raw Waveform','Mean waveform','pkrange min','pkrange max','Vpk')
-xlim([40,60])
+%legend('Raw Waveform','Mean waveform','pkrange min','pkrange max','Vrms')
+xlim([0,10])
 
 %% Coords relative to plot
 
@@ -124,7 +130,6 @@ ylabel('y (mm)')
 zlabel('z (mm)')
 %xlim([15,30])
 %ylim([15,33])
-%clim([0,0.1])
 title('Tri-Planar Scan of Acoustic Field')
 subtitle('Stage Coordinates')
 view(3)
@@ -150,15 +155,15 @@ surf(X2, Y2, Z2, MPa.YZ', 'EdgeColor', 'none')
 [X3, Z3] = meshgrid(relX, relZ);
 Y3 = zeros(size(X3));
 surf(X3, Y3, Z3, MPa.XZ', 'EdgeColor', 'none')
-
+clim([0.005 0.06])
 cb = colorbar;
 cb.Label.String = 'Pressure (MPa)';
 xlabel('x (mm)')
 ylabel('y (mm)')
 zlabel('z (mm)')
 %xlim([15,30])
-%ylim([15,33
-%clim([0,0.1])
+%ylim([15,33])
+
 title('Tri-Planar Scan of Acoustic Field')
 subtitle('Scan Coordinates')
 view(3)

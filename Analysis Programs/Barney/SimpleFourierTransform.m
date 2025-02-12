@@ -4,7 +4,7 @@
 %% Load Data
 % Consider clearing workspace to relieve RAM
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'EchoCheck1';                                                                                         %CHECK
+file_name = '419kHz_11';                                                                                         %CHECK
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 

@@ -45,11 +45,11 @@ if exist('scp', 'var')
     scp.MeasureMode = 2; % Block Mode
 
     % Set sample frequency:
-    MHz = 50;     % CHECK
+    MHz = 10;     % CHECK
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    record_time = 100/1e6; % s                % CHECK
+    record_time = 500/1e6; % s                % CHECK
     scp.RecordLength = scp.SampleFrequency*record_time; % n Samples: max = 33553920 ~ 3e7 (67107840?)    
 
     % Set pre sample ratio:
@@ -69,7 +69,7 @@ if exist('scp', 'var')
     
     % Trigger settings
     % Set trigger timeout: 
-    scp.TriggerTimeOut = 5; % s -> Long delay to indicate trigger not found
+    scp.TriggerTimeOut = 0 * 1e-3; % ms -> Long delay to indicate trigger not found
     
     % Disable all channel trigger sources:
     for ch = scp.Channels
@@ -89,7 +89,7 @@ if exist('scp', 'var')
     clear chTr;
     
     % Set range on each channel (V)
-    scp.Channels(1).Range = 0.5 ;     % CHECK
+    scp.Channels(1).Range = 1 ;     % CHECK
     scp.Channels(2).Range = 5 ;     % CHECK
     
     else
@@ -107,7 +107,7 @@ disp(scp.SampleFrequency/1e6)
 disp(record_time*1e6)
 
 %%
-refreshRate = 0.5; % seconds
+refreshRate = 1; % seconds
 maxRunTime = 1*60; % seconds
 saveData.data = zeros(maxRunTime/refreshRate,scpSettings.RecordLength); % counter,wvfm
 saveData.timestamps = zeros(1,maxRunTime/refreshRate);
@@ -118,8 +118,8 @@ scpSettings.timestamp = datetime; % start time of day
 
 %% Bandpass filter 
 Fs = scpSettings.SampleFrequency; % Sampling Frequency
-F0 = 1*1e6; % Centre
-width = 0.5*1e6;
+F0 = 0.420*1e6; % Centre
+width = 0.01*1e6;
 Fpass1 = F0-width; % First Passband Frequency
 Fpass2 = F0+width; % Second Passband Frequency
 
@@ -137,21 +137,26 @@ while run == 1
     wvfm = measurement(:,1);
     trigger = measurement(:,2);
 
-    %data_f =  bandpass(wvfm, [Fpass1 Fpass2], Fs);
-   
     figure(1)
-    plot(t,noBias(wvfm))
-    %hold on
+    bandpass(wvfm, [Fpass1 Fpass2], Fs)
+
+    data_f =  bandpass(wvfm, [Fpass1 Fpass2], Fs);
+    MPaRMS = rms(data_f)*1e3/150;
+   
+    %{
+    %figure(2)
+    %plot(t,noBias(wvfm))
+    hold on
     %plot(t,trigger)
     %plot(t,data_f)
-    %hold off
+    hold off
     xlabel('Time [us]');
     ylabel('Voltage [V]');
     %xlim([0,20])
     ymax = 0.02;
-    %ylim([-ymax*1.1,ymax*1.1])
-    title(strcat('Elapsed Time:',string(elapsedTime),'s'))
-
+    ylim([-ymax*1.1,ymax*1.1])
+    title(strcat('Elapsed Time:',string(elapsedTime),'s',' - MPaRMS:',string(MPaRMS)))
+    %}
     saveData.data(counter,:) = measurement(:,1);
     saveData.timestamps(counter) = elapsedTime;
 
@@ -165,7 +170,7 @@ end
 %%
 
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'TankConnectorMk5_15'; % CHECK
+File_name = 'Noise_test'; % CHECK
 Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'saveData','scpSettings',"-v7.3");
 disp(strcat('File Saved: Data\',File_name,'.mat'));

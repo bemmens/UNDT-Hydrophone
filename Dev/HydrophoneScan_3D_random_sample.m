@@ -6,11 +6,11 @@ close all;
 clc;
 fclose all;
 
-scpSettings.scanVersion = '3D'; % CHECK
+scpSettings.scanVersion = '3D_random'; % CHECK
 
 %% Check Savefile
-File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = '419kHz_2_6'; % CHECK
+File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\Immasonic\'; % CHECK
+File_name = 'randomtest'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 if isfile(Save_String)
@@ -19,8 +19,6 @@ if isfile(Save_String)
     if check == 0
         error('Canceled')
     end
-else
-    disp('Filename O.K.')
 end
 
 %% Connect to HandyScope
@@ -62,11 +60,11 @@ if exist('scp', 'var')
     scp.MeasureMode = 2; % Block Mode
 
     % Set sample frequency:
-    MHz = 10;     % CHECK
+    MHz = 50;     % CHECK
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    record_time = 500/1e6; % seconds                % CHECK
+    record_time = 100/1e6; % seconds                % CHECK
     scp.RecordLength = scp.SampleFrequency*record_time; % n Samples: max = 33553920 ~ 3e7 (67107840?)    
 
     % Set pre sample ratio:
@@ -134,7 +132,7 @@ end
 import zaber.motion.ascii.Connection;
 import zaber.motion.Units;
 
-connection = Connection.openSerialPort('COM4');                         %CHECK
+connection = Connection.openSerialPort('COM5');                         %CHECK
 try
     connection.enableAlerts();
 
@@ -161,16 +159,23 @@ try
 % Use scanVolumeChecker to quickly make sure that the raster parameters are
 % correct without having to boot up HandyScope each time.#
 
-wavelength = 3.6; % in mm
+wavelength = 0.657; % in mm
 
-raster.home = [25,25,20]; % home position [x,y,x] in mm     % CHECK
-raster.size = [10,10,40]; % [X,Y,Z] in mm                      % CHECK
-raster.step = [1/2^1,1/2^1,1/2^6]*wavelength; % [dx,dy,dx] mm - must be greater than zero          % CHECK
+raster.home = [25,25,30]; % home position [x,y,x] in mm     % CHECK
+raster.size = [0,0,20]; % [X,Y,Z] in mm                      % CHECK
+raster.step = [1,1,1/8]*wavelength; % [dx,dy,dx] mm - must be greater than zero          % CHECK
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
 raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step(1) : (raster.home(1) + 0.5*(raster.size(1))) ;
 raster.ys = (raster.home(2) - 0.5*(raster.size(2))) : raster.step(2) : (raster.home(2) + 0.5*(raster.size(2))) ;
 raster.zs = (raster.home(3) - 0.5*(raster.size(3))) : raster.step(3) : (raster.home(3) + 0.5*(raster.size(3))) ;
+
+rng(0,'twister');
+a = 50;
+b = 100;
+r = (b-a).*rand(1000,1) + a; %random number between a and b
+
+raster.xs = r
 
 raster.xlims = [min(raster.xs),max(raster.xs)];
 raster.ylims = [min(raster.ys),max(raster.ys)];
@@ -245,7 +250,7 @@ end
 
 %% Create results struct
 
-nRepeats = 1;
+nRepeats = 5;
 scpSettings.nRepeats = nRepeats;
 scanData = zeros(length(raster.xs),length(raster.ys),length(raster.zs),scp.RecordLength,nRepeats); % [x,y,z,wvfm,nrepeats]
 
