@@ -6,7 +6,7 @@ This repo contains info on how to use the UNDT Lab's Hydrophone rig.
 
 ### User Manual
 
-Our system is the Precision Acoustic Fibre-Optic Hydrophone Version 1, however the Version 2 model is VERY similar and better explains the cleaning procedure: [Fibre-Optic Hydrophone V2 User Guide](https://www.acoustics.co.uk/wp-content/uploads/2024/02/Fibre-optic-Hydrophone-System-Version-2-User-Guide-v2.0-1.pdf). A paper copy of the V1 instructions is stored with the hardware.
+Our system is the Precision Acoustic Fibre-Optic Hydrophone Version 1 (See manual in _Doccumentation_, however the Version 2 model is VERY similar and its manual better explains the cleaning procedure: [Fibre-Optic Hydrophone V2 User Guide](https://www.acoustics.co.uk/wp-content/uploads/2024/02/Fibre-optic-Hydrophone-System-Version-2-User-Guide-v2.0-1.pdf). A paper copy of the V1 instructions should be stored with the hardware.
 
  Any notable differences to the V2 system are explained below:
 
