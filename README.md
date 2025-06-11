@@ -47,7 +47,7 @@ Please use the [Hardware Log](https://uob-my.sharepoint.com/:x:/r/personal/gv198
 ### Dependencies
 _Zaber Launcher_ (or _Zaber Console_ if having compatibility problems): https://www.zaber.com/software
 
-_Zaber_COM_Driver (if USB connection not recognised): https://www.ftdichip.com/Support/Documents/InstallGuides.htm 
+_Zaber COM Driver_ (if USB connection not recognised): https://www.ftdichip.com/Support/Documents/InstallGuides.htm 
 
 _Zaber Motion Control_: https://software.zaber.com/motion-library/docs/tutorials/install/matlab
 
