@@ -62,6 +62,13 @@ https://dotnet.microsoft.com/en-us/download/dotnet-framework
 
 FOH Control must be run with Admin privilages.
 
+
+Matlab Addons:
+
+_MATLAB Support for MinGW-w64 C/C++/Fortran Compiler_ 
+
+_Matlab LibTiePie 0.6.4 instrument driver for USB scopes_
+
 ## Scan and Analysis Programs
 Scanning and analysis programs are seperated so that the raw data is preserved and analysis methods can be independantly developed without having to repeat scans. However, there are still different types of scan e.g. ome scans use a different rasterisation method. This means that scan and analysis programs must be matched. 
 
