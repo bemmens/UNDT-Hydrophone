@@ -8,7 +8,7 @@ fclose all;
 
 %% Check Savefile
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'TankConnectorMk5_7'; % CHECK
+File_name = 'NearSurface_DIYMk1_5'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 if isfile(Save_String)
@@ -82,7 +82,7 @@ if exist('scp', 'var')
     
     % Trigger settings
     % Set trigger timeout: 
-    scp.TriggerTimeOut = 5; % ms -> Long delay to indicate trigger not found
+    scp.TriggerTimeOut = 5; % s -> Long delay to indicate trigger not found
     
     % Disable all channel trigger sources:
     for ch = scp.Channels
@@ -112,7 +112,7 @@ end
 % Save aprameters for analysis
 scpSettings.RecordLength = scp.RecordLength;
 scpSettings.SampleFrequency = scp.SampleFrequency;
-scpSettings.nRepeats = 10;           % CHECK
+scpSettings.nRepeats = 5;           % CHECK
 scpSettings.timestamp = datetime;
 scpSettings.scanVersion = 2; % CHECK
 
@@ -161,37 +161,36 @@ try
 % correct without having to boot up HandyScope each time.
 
 c_water = 1450; % speed of sound m/s
-Hz = 1e6;
+Hz = 1e6; % CHECK
 wavelength = c_water*1e3/Hz; % in mm
 
-ymin = 0;
-ymax = 50;
-xmin = 0;
-xmax = 50;
-zmin = 0;
-zmax = 10;
+% ymin = 0;
+% ymax = 50;
+% xmin = 0;
+% xmax = 50;
+% zmin = 0;
+% zmax = 10;
+% 
+% xhome = mean([xmin,xmax]);
+% yhome = mean([ymin,ymax]);
+% zhome = mean([zmin,zmax]);
+% 
+% xsize = xmax - xmin;
+% ysize = ymax-ymin;
+% zsize = zmax-zmin;
+% 
+% raster.home = [xhome,yhome,zhome]; % home position [x,y,z] in mm     % CHECK
+% raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-xhome = mean([xmin,xmax]);
-yhome = mean([ymin,ymax]);
-zhome = mean([zmin,zmax]);
+raster.home = [28.5,24.8,10.49+7]; % home position [x,y,z] in mm     % CHECK
+raster.size = [1 10 20]; % [X,Y,Z] in mm                      % CHECK
+raster.step = [0.5^2,0.5^2,0.5^4]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
 
-xsize = xmax - xmin;
-ysize = ymax-ymin;
-zsize = zmax-zmin;
-
-raster.home = [xhome,yhome,zhome]; % home position [x,y,x] in mm     % CHECK
-raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
-
-raster.home = [25,27,23]; % home position [x,y,x] in mm     % CHECK
-raster.size = [20 20 20]; % [X,Y,Z] in mm                      % CHECK
-raster.step = [0.5^1,0.5^1,0.5^1]*wavelength; % [dx,dy,dx] mm - must be greater than zero          % CHECK
-
-raster.pause_time = 0/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
+raster.pause_time = 20/1000; % s - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
 raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step(1) : (raster.home(1) + 0.5*(raster.size(1))) ;
 raster.ys = (raster.home(2) - 0.5*(raster.size(2))) : raster.step(2) : (raster.home(2) + 0.5*(raster.size(2))) ;
 raster.zs = (raster.home(3) - 0.5*(raster.size(3))) : raster.step(3) : (raster.home(3) + 0.5*(raster.size(3))) ;
-
 
 raster.xlims = [min(raster.xs),max(raster.xs)];
 raster.ylims = [min(raster.ys),max(raster.ys)];
@@ -336,7 +335,7 @@ for n = 1: NPointsXY
         [scp, measurement] = takeMeasOscilloscope( scp );
       
         % Store the measurement in the data array
-        scanData.XY(i,j,:,:,r) = measurement;
+        scanData.XY(i,j,:,:,r) = measurement(:,1:2);
     end
 
     % Admin
@@ -380,7 +379,7 @@ for n = 1: NPointsYZ
         [scp, measurement] = takeMeasOscilloscope( scp );
       
         % Store the measurement in the data array
-        scanData.YZ(i,j,:,:,r) = measurement;
+        scanData.YZ(i,j,:,:,r) = measurement(:,1:2);
     end
 
     % Admin
@@ -424,7 +423,7 @@ for n = 1: NPointsXZ
         [scp, measurement] = takeMeasOscilloscope( scp );
       
         % Store the measurement in the data array
-        scanData.XZ(i,j,:,:,r) = measurement;
+        scanData.XZ(i,j,:,:,r) = measurement(:,1:2);
     end
 
     % Admin

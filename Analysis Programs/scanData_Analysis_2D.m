@@ -4,7 +4,7 @@ clear all
 
 %% Load Data
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'DIYMk1Test26';
+file_name = 'TankConnectorMk5_2DxyTEST';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -13,7 +13,8 @@ disp(scpSettings.timestamp)
 disp('Data Size:')
 disp(size(scanData))
 
-scanData = squeeze(scanData(:,1,:,:,1));
+%%
+scanData = squeeze(scanData(:,:,1,:,:,:));
 disp(size(scanData))
 
 %% Check Waveform and Extract Peak Voltages

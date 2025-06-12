@@ -6,7 +6,7 @@ analysisVersion = 2;
 
 %% Load Data
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'TankConnectorMk5_7';
+file_name = 'NearSurface_DIYMk1_2';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -20,11 +20,12 @@ end
 %%
 % Useful Constants
 t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
+disp(max(t))
 
 %% Post-Process Data
 
-pkrange = [30,60]; % us - time range to look for peak 
-pkrangeidx = pkrange*scpSettings.SampleFrequency/1e6; % corresponding array index
+pkrange = [0.000000001,99]; % us - time range to look for peak 
+pkrangeidx = ceil(pkrange*scpSettings.SampleFrequency/1e6)+1; % corresponding array index
 
 % remove trigger (2nd) channel
 scanData_noTrigger.XY = squeeze(scanData.XY(:,:,:,1,:));
@@ -60,8 +61,8 @@ MPa.YZ = Vmean.YZ*1e3/mVperMPa;
 MPa.XZ = Vmean.XZ*1e3/mVperMPa; 
 
 %% Check Waveform 
-x_index = 10;
-y_index = 10;
+x_index = 14;
+y_index = 14;
 
 pks = find(scanData_mean.XY(x_index,y_index,:,1) == Vpk.XY(x_index,y_index));
 wvfmData_raw1 = squeeze(scanData_noBias.XY(x_index,y_index,:,1))*1e3/mVperMPa;
@@ -73,12 +74,12 @@ wvfmData_mean = squeeze(scanData_mean.XY(x_index,y_index,:))*1e3/mVperMPa;
 
 figure(1)
 plot(t,wvfmData_raw1)
-hold on
-%plot(t,wvfmData_raw2)
-%plot(t,wvfmData_raw3)
-%plot(t,wvfmData_raw4)
-%plot(t,wvfmData_raw5)
-plot(t,wvfmData_mean)
+% hold on
+plot(t,wvfmData_raw2)
+plot(t,wvfmData_raw3)
+plot(t,wvfmData_raw4)
+plot(t,wvfmData_raw5)
+% plot(t,wvfmData_mean)
 %xlim([0,200])
 x = raster.xs(x_index);
 y = raster.ys(y_index);
@@ -86,11 +87,11 @@ z = raster.home(3);
 title(strcat('Raw Data at [x,y,z] = [',string(x),', ',string(y),', ',string(z),'] mm'))
 xlabel('Time [us]');
 ylabel('Amplitude [MPa]');
-hold off
+% hold off
 xline(pkrange)
 xline(t(pks),'--r')
 legend('Raw Waveform','Mean waveform','pkrange min','pkrange max','Vpk')
-xlim([40,60])
+% xlim([40,60])
 
 %% Coords relative to plot
 

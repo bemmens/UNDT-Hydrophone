@@ -1,5 +1,5 @@
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'TankConnectorMk5_14'; % CHECK
+File_name = 'TankConnectorMk5_24'; % CHECK
 Save_String=strcat(File_loc,File_name,'.mat');
 load(Save_String)
 
@@ -45,7 +45,7 @@ xlabel('Time [us]')
 %ylabel('Displacement [Volts]')
 ylabel('Pressure [MPa]')
 %ylim([-0.8,0.8])
-title('Time averaged waveform 30 cycles')
+title('Time averaged waveform')
 
 %%
 src.Value = 1;

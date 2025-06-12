@@ -2,11 +2,11 @@
 % For reference: scanData.AB = [A,B,samples,channel,nrepeats];
 clear all
 
-analysisVersion = 2;
+analysisVersion = 3;
 
 %% Load Data
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'NearSurface_DIYMk1_4';
+file_name = 'NearSurface_DIYMk1_5';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -16,6 +16,7 @@ if analysisVersion == 0
 elseif analysisVersion ~= scpSettings.scanVersion
     warning("Scan and analysis programs have mismatched versions.")
 end
+
 
 %%
 % Useful Constants
@@ -29,18 +30,16 @@ pkrangeidx = pkrange*scpSettings.SampleFrequency/1e6; % corresponding array inde
 % remove trigger (2nd) channel
 scanData_noTrigger.XY = squeeze(scanData.XY(:,:,:,1,:));
 scanData_noTrigger.YZ = squeeze(scanData.YZ(:,:,:,1,:));
-scanData_noTrigger.XZ = squeeze(scanData.XZ(:,:,:,1,:));
 
 % remove bias
 scanData_noBias.XY = scanData_noTrigger.XY - mean(scanData_noTrigger.XY,3);
 scanData_noBias.YZ = scanData_noTrigger.YZ - mean(scanData_noTrigger.YZ,3);
-scanData_noBias.XZ = scanData_noTrigger.XZ - mean(scanData_noTrigger.XZ,3);
 
 
 %% Bandpass filter 
 
-x_index = 15;
-y_index = 15;
+x_index = 4;
+y_index = 4;
 z_index = 10;
 
 Fs = scpSettings.SampleFrequency; % Sampling Frequency
@@ -56,7 +55,6 @@ bandpass(squeeze(scanData_noBias.XY(x_index,y_index,:))', [Fpass1 Fpass2], Fs)
 
 scanData_bpf.XY = filter( bpfilter.Coefficients, 1, scanData_noBias.XY, [], 3);
 scanData_bpf.YZ = filter( bpfilter.Coefficients, 1, scanData_noBias.YZ, [], 3);
-scanData_bpf.XZ = filter( bpfilter.Coefficients, 1, scanData_noBias.XZ, [], 3);
 
 figure(100)
 plot(t,squeeze(scanData_bpf.XY(x_index,y_index,:,1)))
@@ -67,7 +65,6 @@ hold off
 %% With nRpeats
 Vrms.XY = mean(squeeze(rms(scanData_noBias.XY,3)),3); % rms voltage at [x,y,z0]
 Vrms.YZ = mean(squeeze(rms(scanData_noBias.YZ,3)),3); % rms voltage at [x,y,z0]
-Vrms.XZ = mean(squeeze(rms(scanData_noBias.XZ,3)),3); % rms voltage at [x,y,z0]
 
 % Vrms.XY = squeeze(rms(scanData_bpf.XY,3)); % rms voltage at [x,y,z0]
 % Vrms.YZ = squeeze(rms(scanData_bpf.YZ,3)); % rms voltage at [x,y,z0]
@@ -77,11 +74,10 @@ Vrms.XZ = mean(squeeze(rms(scanData_noBias.XZ,3)),3); % rms voltage at [x,y,z0]
 mVperMPa = 170.49; % CHECK
 MPa.XY = Vrms.XY*1e3/mVperMPa; 
 MPa.YZ = Vrms.YZ*1e3/mVperMPa; 
-MPa.XZ = Vrms.XZ*1e3/mVperMPa; 
 
 %% Check Waveform 
 
-wvfmData_raw1 = squeeze(scanData_noBias.XZ(x_index,y_index,:,1))*1e3/mVperMPa;
+wvfmData_raw1 = squeeze(scanData_noBias.XY(x_index,y_index,:,1))*1e3/mVperMPa;
 
 %% Plots
 figure(1)
@@ -120,11 +116,6 @@ surf(X1, Y1, Z1, MPa.XY', 'EdgeColor', 'none')
 X2 = ones(size(Y2)) * raster.home(1);
 surf(X2, Y2, Z2, MPa.YZ', 'EdgeColor', 'none')
 
-% XZ plane
-[X3, Z3] = meshgrid(raster.xs, raster.zs);
-Y3 = ones(size(X3)) * raster.home(2);
-surf(X3, Y3, Z3, MPa.XZ', 'EdgeColor', 'none')
-
 cb = colorbar;
 cb.Label.String = 'Pressure (MPa)';
 xlabel('x (mm)')
@@ -132,7 +123,7 @@ ylabel('y (mm)')
 zlabel('z (mm)')
 %xlim([15,30])
 %ylim([15,33])
-title('Tri-Planar Scan of Acoustic Field')
+title('Bi-Planar Scan of Acoustic Field')
 subtitle('Stage Coordinates')
 view(3)
 axis vis3d
@@ -153,11 +144,6 @@ surf(X1, Y1, Z1, MPa.XY', 'EdgeColor', 'none')
 X2 = zeros(size(Y2));
 surf(X2, Y2, Z2, MPa.YZ', 'EdgeColor', 'none')
 
-% XZ plane
-[X3, Z3] = meshgrid(relX, relZ);
-Y3 = zeros(size(X3));
-surf(X3, Y3, Z3, MPa.XZ', 'EdgeColor', 'none')
-% clim([0.005 0.06])
 cb = colorbar;
 cb.Label.String = 'Pressure (MPa)';
 xlabel('x (mm)')
@@ -165,13 +151,14 @@ ylabel('y (mm)')
 zlabel('z (mm)')
 %xlim([15,30])
 %ylim([15,33])
-
-title('Tri-Planar Scan of Acoustic Field')
+title('Bi-Planar Scan of Acoustic Field')
 subtitle('Scan Coordinates')
 view(3)
 axis vis3d
 hold off
 rotate3d
+
+
 
 
 

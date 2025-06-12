@@ -49,7 +49,7 @@ if exist('scp', 'var')
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    record_time = 100e-6; % s                % CHECK
+    record_time = 50/1e6; % s                % CHECK
     scp.RecordLength = scp.SampleFrequency*record_time; % n Samples: max = 33553920 ~ 3e7 (67107840?)    
 
     % Set pre sample ratio:
@@ -89,9 +89,10 @@ if exist('scp', 'var')
     clear chTr;
     
     % Set range on each channel (V)
-    scp.Channels(1).Range = 0.5 ;     % CHECK
+    scp.Channels(1).Range = 0.3 ;     % CHECK
     scp.Channels(2).Range = 5 ;     % CHECK
-    
+    scp.Channels(3).Range = 20 ;     % CHECK
+%     
     else
     warning('No Scope Detected')
 end
@@ -107,10 +108,7 @@ disp(scp.SampleFrequency/1e6)
 disp(record_time*1e6)
 
 %%
-refreshRate = 1*1e0; % seconds
-maxRunTime = 1*60; % seconds
-saveData.data = zeros(maxRunTime/refreshRate,scpSettings.RecordLength); % counter,wvfm
-saveData.timestamps = zeros(1,maxRunTime/refreshRate);
+refreshRate = 1; % seconds (1s reccomended min)
 
 t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
 
@@ -119,50 +117,43 @@ scpSettings.timestamp = datetime; % start time of day
 %% Bandpass filter 
 Fs = scpSettings.SampleFrequency; % Sampling Frequency
 F0 = 1*1e6; % Centre
-width = 0.5*1e6;
+width = 0.3*1e6;
 Fpass1 = F0-width; % First Passband Frequency
 Fpass2 = F0+width; % Second Passband Frequency
 
 %%
-run = 1;
-counter = 1;
-tic
-while run == 1
-
+run=1;
+while run==1
+    
     % Take measurement
     %disp('Measuring...')
     [scp, measurement] = takeMeasOscilloscope( scp );
-    elapsedTime = toc;
 
     wvfm = measurement(:,1);
-    trigger = measurement(:,2);
+    trig = measurement(:,2);
+    input = measurement(:,3);
 
-    %data_f =  bandpass(wvfm, [Fpass1 Fpass2], Fs);
-   
-    figure(1)
-    plot(t,noBias(wvfm))
-    %hold on
-    %plot(t,trigger)
-    %plot(t,data_f)
-    %hold off
-    xlabel('Time [us]');
-    ylabel('Voltage [V]');
-    %xlim([0,20])
-    ymax = 0.02;
-    %ylim([-ymax*1.1,ymax*1.1])
-    title(strcat('Elapsed Time:',string(elapsedTime),'s'))
-
-    saveData.data(counter,:) = measurement(:,1);
-    saveData.timestamps(counter) = elapsedTime;
+    
+    wvfm_f = bandpass(wvfm, [Fpass1 Fpass2], Fs);
+    
+%     figure(1)
+    tiledlayout(3,1)
+    nexttile
+    plot(t,wvfm) 
+    nexttile
+    plot(t,trig) %scaled to match peak of waveform
+    nexttile
+    plot(t,input)
 
     pause(refreshRate)
-    counter = counter + 1;
-    if counter > maxRunTime/refreshRate
-        warning('saveData overflowwing!')
-    end
+
+
 end
 
 %%
+saveData.wvfm = wvfm;
+
+saveData.bandpass = [[Fpass1 Fpass2], Fs];
 
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
 File_name = 'test'; % CHECK
@@ -170,53 +161,4 @@ Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'saveData','scpSettings',"-v7.3");
 disp(strcat('File Saved: Data\',File_name,'.mat'));
 
-%% Calculate rms
-load('419kHz_2_1.mat')
-mVpMPa = 150; % approx
 
-data = saveData.data(1:end,:);
-t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
-timestamps = saveData.timestamps;
-MPa = data*1e3/mVpMPa;
-figure(1)
-plot(t,MPa(1,:))
-ylabel('MPa')
-xlabel('Time [us]')
-title('Example Noise')
-
-bias = mean(data,2);
-mVrms =  rms(data-bias,2)*1e3;
-MPa_rms = mVrms/mVpMPa;
-mean_bias = mean(bias);
-
-figure(2)
-scatter(squeeze(saveData.timestamps(:,1:end)),MPa_rms)
-ylabel('MPa RMS')
-xlabel('Time')
-title('Noise over Time')
-
-%%
-% Bandpass filter design
-Fs = scpSettings.SampleFrequency; % Sampling Frequency
-F0 = 0.419*1e6; % Centre
-width = 0.15*1e6;
-Fpass1 = F0-width; % First Passband Frequency
-Fpass2 = F0+width; % Second Passband Frequency
-
-wvfms_biases = mean(data,2);
-
-% Apply the bandpass filter
-wvfms_filtered = bandpass(data', [Fpass1 Fpass2], Fs)';
-
-filtered_rms = squeeze(rms(wvfms_filtered,2))*1e3/150;
-
-figure(3)
-plot(timestamps(:,1:end-1),filtered_rms(1:end-1,:))
-hold on
-plot(timestamps(:,1:end-1),MPa_rms(1:end-1,:))
-hold off
-ylim([0,0.14])
-ylabel('MPa RMS')
-xlabel('Time')
-title('Signal RMS - f0=429kHz, b=150kHz')
-legend('Bandpass','Raw')

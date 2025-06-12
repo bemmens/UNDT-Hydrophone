@@ -45,11 +45,11 @@ if exist('scp', 'var')
     scp.MeasureMode = 2; % Block Mode
 
     % Set sample frequency:
-    MHz = 10;     % CHECK
+    MHz = 50;     % CHECK
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    record_time = 500/1e6; % s                % CHECK
+    record_time = 100/1e6; % s                % CHECK
     scp.RecordLength = scp.SampleFrequency*record_time; % n Samples: max = 33553920 ~ 3e7 (67107840?)    
 
     % Set pre sample ratio:
@@ -69,7 +69,7 @@ if exist('scp', 'var')
     
     % Trigger settings
     % Set trigger timeout: 
-    scp.TriggerTimeOut = 0 * 1e-3; % ms -> Long delay to indicate trigger not found
+    scp.TriggerTimeOut = 1; % s -> Long delay to indicate trigger not found
     
     % Disable all channel trigger sources:
     for ch = scp.Channels
@@ -89,9 +89,10 @@ if exist('scp', 'var')
     clear chTr;
     
     % Set range on each channel (V)
-    scp.Channels(1).Range = 1 ;     % CHECK
+    scp.Channels(1).Range = 0.03 ;     % CHECK
     scp.Channels(2).Range = 5 ;     % CHECK
-    
+    scp.Channels(3).Range = 0.6 ;     % CHECK
+%     
     else
     warning('No Scope Detected')
 end
@@ -115,8 +116,8 @@ scpSettings.timestamp = datetime; % start time of day
 
 %% Bandpass filter 
 Fs = scpSettings.SampleFrequency; % Sampling Frequency
-F0 = 0.420*1e6; % Centre
-width = 0.01*1e6;
+F0 = 420*1e3; % Centre
+width = 0.3*F0;
 Fpass1 = F0-width; % First Passband Frequency
 Fpass2 = F0+width; % Second Passband Frequency
 
@@ -130,17 +131,17 @@ while run == 1
     [scp, measurement] = takeMeasOscilloscope( scp );
 
     wvfm = measurement(:,1);
+    trig = measurement(:,2);
+    input = measurement(:,3);
 
     MPa = wvfm*1e3/150;
-    trigger = measurement(:,2);
-
     MPaRMS = rms(wvfm)*1e3/150;
 
     wvfm_f = bandpass(wvfm, [Fpass1 Fpass2], Fs);
     MPaRMS_f = rms(wvfm_f)*1e3/150;
 
     figure(1)
-    %bandpass(wvfm, [Fpass1 Fpass2], Fs)
+%     bandpass(wvfm, [Fpass1 Fpass2], Fs)
     [p,f] = pspectrum(MPa/1e6,Fs);
     plot(f,log(p))
     xlabel('Frequency [MHz]')
@@ -148,15 +149,16 @@ while run == 1
     title('Power Spectrum')
 
     figure(2)
-    plot(t,wvfm)
+    plot(t,wvfm*1e3,':')
     hold on
-    plot(t,wvfm_f)
+    plot(t,wvfm_f*1e3)
+%     plot(t,input)
     hold off
     xlabel('Time (us)')
-    ylabel('Amplitude (V)')
+    ylabel('Amplitude (mV)')
     title(strcat('Filtered RMS Pressure: ',string(MPaRMS_f),' MPa'))
 
-    pause(refreshRate)
+    pause(refreshRate/2)
 
 end
 
@@ -166,7 +168,7 @@ saveData.wvfm = wvfm;
 saveData.bandpass = [[Fpass1 Fpass2], Fs];
 
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = '419kHz_2_14_30V'; % CHECK
+File_name = 'test'; % CHECK
 Save_String=strcat(File_loc,File_name,'.mat');
 save(Save_String,'saveData','scpSettings',"-v7.3");
 disp(strcat('File Saved: Data\',File_name,'.mat'));
