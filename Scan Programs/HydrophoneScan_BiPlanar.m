@@ -8,7 +8,7 @@ fclose all;
 
 %% Check Savefile
 File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'NearSurface_DIYMk1_5'; % CHECK
+File_name = 'NearSurface_DIYMk1_19'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 if isfile(Save_String)
@@ -161,15 +161,15 @@ try
 % correct without having to boot up HandyScope each time.
 
 c_water = 1450; % speed of sound m/s
-Hz = 1e6; % CHECK
+Hz = 1.05e6; % CHECK
 wavelength = c_water*1e3/Hz; % in mm
 
 % ymin = 0;
 % ymax = 50;
 % xmin = 0;
 % xmax = 50;
-% zmin = 0;
-% zmax = 10;
+% zmin = 17.5;
+% zmax = 17.5+20;
 % 
 % xhome = mean([xmin,xmax]);
 % yhome = mean([ymin,ymax]);
@@ -182,9 +182,10 @@ wavelength = c_water*1e3/Hz; % in mm
 % raster.home = [xhome,yhome,zhome]; % home position [x,y,z] in mm     % CHECK
 % raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-raster.home = [28.5,24.8,10.49+7]; % home position [x,y,z] in mm     % CHECK
-raster.size = [10 10 20]; % [X,Y,Z] in mm                      % CHECK
-raster.step = [0.5^2,0.5^2,0.5^4]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
+raster.home = [25.3,25,17.5+5]; % home position [x,y,z] in mm     % CHECK
+raster.size = [7.5 7.5 10]; % [X,Y,Z] in mm                      % CHECK
+raster.step = [0.5^4,0.5^4,0.5^4]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
+raster.zPlane = 19.9;
 
 raster.pause_time = 20/1000; % s - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
@@ -252,7 +253,7 @@ for j = 1:length(ys)
         xs = raster.xs;
     end
     for i = 1:length(xs)
-        snakeCoords.XY(index,:) = [xs(i), ys(j), raster.home(3)];
+        snakeCoords.XY(index,:) = [xs(i), ys(j), raster.zPlane];
         index = index +1;
     end
 end

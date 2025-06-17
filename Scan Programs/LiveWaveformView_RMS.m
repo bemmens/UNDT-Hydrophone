@@ -118,8 +118,8 @@ scpSettings.timestamp = datetime; % start time of day
 
 %% Bandpass filter 
 Fs = scpSettings.SampleFrequency; % Sampling Frequency
-F0 = 0.420*1e6; % Centre
-width = 0.01*1e6;
+F0 = 1*1e6; % Centre
+width = 0.1*1e6;
 Fpass1 = F0-width; % First Passband Frequency
 Fpass2 = F0+width; % Second Passband Frequency
 
@@ -203,7 +203,7 @@ title('Noise over Time')
 %%
 % Bandpass filter design
 Fs = scpSettings.SampleFrequency; % Sampling Frequency
-F0 = 0.419*1e6; % Centre
+F0 = 1*1e6; % Centre
 width = 0.15*1e6;
 Fpass1 = F0-width; % First Passband Frequency
 Fpass2 = F0+width; % Second Passband Frequency

@@ -6,7 +6,7 @@ analysisVersion = 3;
 
 %% Load Data
 folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'NearSurface_DIYMk1_5';
+file_name = 'NearSurface_DIYMk1_19';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -35,33 +35,35 @@ scanData_noTrigger.YZ = squeeze(scanData.YZ(:,:,:,1,:));
 scanData_noBias.XY = scanData_noTrigger.XY - mean(scanData_noTrigger.XY,3);
 scanData_noBias.YZ = scanData_noTrigger.YZ - mean(scanData_noTrigger.YZ,3);
 
+disp(size(scanData_noBias.XY))
 
-%% Bandpass filter 
+% %% Bandpass filter 
+% 
+x_index = 20;
+y_index = 40;
+z_index = 5;
 
-x_index = 4;
-y_index = 4;
-z_index = 10;
 
-Fs = scpSettings.SampleFrequency; % Sampling Frequency
-F0 = 1*1e6; % Centre
-width = 0.25*1e6;
-Fpass1 = F0-width; % First Passband Frequency
-Fpass2 = F0+width; % Second Passband Frequency
-
-% Apply the bandpass filter
-figure(1)
-bandpass(squeeze(scanData_noBias.XY(x_index,y_index,:))', [Fpass1 Fpass2], Fs)
-[~,bpfilter] = bandpass(squeeze(scanData_noBias.XY(x_index,y_index,:))', [Fpass1 Fpass2], Fs);
-
-scanData_bpf.XY = filter( bpfilter.Coefficients, 1, scanData_noBias.XY, [], 3);
-scanData_bpf.YZ = filter( bpfilter.Coefficients, 1, scanData_noBias.YZ, [], 3);
-
-figure(100)
-plot(t,squeeze(scanData_bpf.XY(x_index,y_index,:,1)))
-hold on
-%plot(t,squeeze(scanData_noBias.XY(10,10,:)))
-hold off
-%xlim([100,150])
+% Fs = scpSettings.SampleFrequency; % Sampling Frequency
+% F0 = 1*1e6; % Centre
+% width = 0.25*1e6;
+% Fpass1 = 5e5; % First Passband Frequency
+% Fpass2 = F0+width; % Second Passband Frequency
+% 
+% % Apply the bandpass filter
+% figure(1)
+% bandpass(squeeze(scanData_noBias.XY(x_index,y_index,:))', [Fpass1 Fpass2], Fs)
+% [~,bpfilter] = bandpass(squeeze(scanData_noBias.XY(x_index,y_index,:))', [Fpass1 Fpass2], Fs);
+% 
+% scanData_bpf.XY = filter( bpfilter.Coefficients, 1, scanData_noBias.XY, [], 3);
+% scanData_bpf.YZ = filter( bpfilter.Coefficients, 1, scanData_noBias.YZ, [], 3);
+% 
+% figure(100)
+% plot(t,squeeze(scanData_bpf.XY(x_index,y_index,:,1)))
+% hold on
+% %plot(t,squeeze(scanData_noBias.XY(10,10,:)))
+% hold off
+% %xlim([100,150])
 %% With nRpeats
 Vrms.XY = mean(squeeze(rms(scanData_noBias.XY,3)),3); % rms voltage at [x,y,z0]
 Vrms.YZ = mean(squeeze(rms(scanData_noBias.YZ,3)),3); % rms voltage at [x,y,z0]
@@ -108,13 +110,15 @@ hold on
 
 % XY plane
 [X1, Y1] = meshgrid(raster.xs, raster.ys);
-Z1 = ones(size(X1)) * raster.home(3);
+Z1 = ones(size(X1)) * raster.zPlane;
 surf(X1, Y1, Z1, MPa.XY', 'EdgeColor', 'none')
 
 % YZ plane
 [Y2, Z2] = meshgrid(raster.ys, raster.zs);
 X2 = ones(size(Y2)) * raster.home(1);
 surf(X2, Y2, Z2, MPa.YZ', 'EdgeColor', 'none')
+
+set(gca, 'ZDir', 'reverse')
 
 cb = colorbar;
 cb.Label.String = 'Pressure (MPa)';
@@ -130,36 +134,54 @@ axis vis3d
 hold off
 rotate3d
 
-%% Plot 3D orthogonal views - Relative to scan centre
+% %% Plot 3D orthogonal views - Relative to scan centre
+% figure(3)
+% hold on
+% 
+% % XY plane
+% [X1, Y1] = meshgrid(relX, relY);
+% Z1 = zeros(size(X1));
+% surf(X1, Y1, Z1, MPa.XY', 'EdgeColor', 'none')
+% 
+% % YZ plane
+% [Y2, Z2] = meshgrid(relY, relZ);
+% X2 = zeros(size(Y2));
+% surf(X2, Y2, Z2, MPa.YZ', 'EdgeColor', 'none')
+% 
+% cb = colorbar;
+% cb.Label.String = 'Pressure (MPa)';
+% xlabel('x (mm)')
+% ylabel('y (mm)')
+% zlabel('z (mm)')
+% %xlim([15,30])
+% %ylim([15,33])
+% title('Bi-Planar Scan of Acoustic Field')
+% subtitle('Scan Coordinates')
+% view(3)
+% axis vis3d
+% hold off
+% rotate3d
+
+%% 
+%% Plot 2D XY Plane
 figure(3)
-hold on
-
-% XY plane
-[X1, Y1] = meshgrid(relX, relY);
-Z1 = zeros(size(X1));
-surf(X1, Y1, Z1, MPa.XY', 'EdgeColor', 'none')
-
-% YZ plane
-[Y2, Z2] = meshgrid(relY, relZ);
-X2 = zeros(size(Y2));
-surf(X2, Y2, Z2, MPa.YZ', 'EdgeColor', 'none')
-
+subplot(1, 2, 1); % Create a subplot for XY Plane
+imagesc(raster.xs, raster.ys, MPa.XY')
 cb = colorbar;
 cb.Label.String = 'Pressure (MPa)';
-xlabel('x (mm)')
-ylabel('y (mm)')
-zlabel('z (mm)')
-%xlim([15,30])
-%ylim([15,33])
-title('Bi-Planar Scan of Acoustic Field')
-subtitle('Scan Coordinates')
-view(3)
-axis vis3d
-hold off
-rotate3d
+xlabel('X (mm)');
+ylabel('Y (mm)');
+title(strcat('Pressure in XY Plane at z =',{' '}, string(round(raster.zPlane, 1)), ' mm'));
+axis xy; % Correct the axis direction
+axis image; % Set aspect ratio suitable for images
 
-
-
-
-
-
+subplot(1, 2, 2); % Create a subplot for YZ Plane
+imagesc(raster.ys, raster.zs, MPa.YZ') % Flip the z-axis
+cb = colorbar;
+cb.Label.String = 'Pressure (MPa)';
+xlabel('Y (mm)');
+ylabel('Z (mm)');
+title(strcat('Pressure in YZ Plane at x =',{' '}, string(x), ' mm'));
+axis xy; % Correct the axis direction
+axis image; % Set aspect ratio suitable for images
+set(gca, 'YDir', 'reverse'); % Reverse the z-axis
