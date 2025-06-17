@@ -63,7 +63,7 @@ https://dotnet.microsoft.com/en-us/download/dotnet-framework
 FOH Control must be run with Admin privilages.
 
 
-Matlab Addons:
+Matlab (2022a) Addons:
 
 _MATLAB Support for MinGW-w64 C/C++/Fortran Compiler_ 
 
