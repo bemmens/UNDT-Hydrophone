@@ -53,7 +53,7 @@ _Zaber Motion Control_: https://software.zaber.com/motion-library/docs/tutorials
 
 _TiePie Drivers_: [https://www.tiepie.com/en/download/archive](https://www.tiepie.com/en/download/archive). "TiePie USB driver 8.1.9"
 
-LibTiePie may need this Matlab AddOn: MATLAB Support for MinGW-w64 C/C++/Fortran Compiler
+_LibTiePie_ may need this Matlab AddOn: MATLAB Support for MinGW-w64 C/C++/Fortran Compiler
 
 _FOH Control_: Installed with wizard over USB from the hardware. 
 
