@@ -31,29 +31,33 @@ try
 
 % make sure the full range of is movement is within the limits of the
 % apparatus
+% 
+% ymin = 25;
+% ymax = 25;
+% xmin = 25;
+% xmax = 25;
+% zmin = 40-20;
+% zmax = 40;
+% 
+% xhome = mean([xmin,xmax]);
+% yhome = mean([ymin,ymax]);
+% zhome = mean([zmin,zmax]);
+% 
+% xsize = xmax - xmin;
+% ysize = ymax-ymin;
+% zsize = zmax-zmin;
 
-ymin = 25;
-ymax = 25;
-xmin = 25;
-xmax = 25;
-zmin = 40-20;
-zmax = 40;
+% raster.home = [xhome,yhome,zhome]; % home position [x,y,x] in mm     % CHECK
+% raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-xhome = mean([xmin,xmax]);
-yhome = mean([ymin,ymax]);
-zhome = mean([zmin,zmax]);
 
-xsize = xmax - xmin;
-ysize = ymax-ymin;
-zsize = zmax-zmin;
+c_water = 1450; % speed of sound m/s
+Hz = 2e6; % CHECK
+wavelength = c_water*1e3/Hz; % in mm
 
-raster.home = [xhome,yhome,zhome]; % home position [x,y,x] in mm     % CHECK
-raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
-
-raster.home = [26.5,28.5,30]; % home position [x,y,x] in mm     % CHECK
-raster.size = [30 30 5]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
-
-raster.step = [1,1,1]; % mm  [dx,dy,dz]                      % CHECK
+raster.home = [47.5 25 16]; % home position [x,y,x] in mm     % CHECK
+raster.size = [5 50 15]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
+raster.step = [2,2,2]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
 if min(raster.home - raster.size/2) < 0

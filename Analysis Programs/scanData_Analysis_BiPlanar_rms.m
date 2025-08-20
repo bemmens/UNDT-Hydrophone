@@ -5,8 +5,8 @@ clear all
 analysisVersion = 3;
 
 %% Load Data
-folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'NearSurface_DIYMk1_19';
+folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\';
+file_name = 'ImpulsonicsZScan1';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -39,9 +39,9 @@ disp(size(scanData_noBias.XY))
 
 % %% Bandpass filter 
 % 
-x_index = 20;
-y_index = 40;
-z_index = 5;
+x_index = 1;
+y_index = 1;
+z_index = 1;
 
 
 % Fs = scpSettings.SampleFrequency; % Sampling Frequency

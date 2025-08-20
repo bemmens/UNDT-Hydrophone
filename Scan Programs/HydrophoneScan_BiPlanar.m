@@ -7,8 +7,8 @@ clc;
 fclose all;
 
 %% Check Savefile
-File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'NearSurface_DIYMk1_19'; % CHECK
+File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\'; % CHECK
+File_name = 'ImpulsonicsZScan1'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 if isfile(Save_String)
@@ -82,7 +82,7 @@ if exist('scp', 'var')
     
     % Trigger settings
     % Set trigger timeout: 
-    scp.TriggerTimeOut = 5; % s -> Long delay to indicate trigger not found
+    scp.TriggerTimeOut = 0; % s -> Long delay to indicate trigger not found
     
     % Disable all channel trigger sources:
     for ch = scp.Channels
@@ -112,7 +112,7 @@ end
 % Save aprameters for analysis
 scpSettings.RecordLength = scp.RecordLength;
 scpSettings.SampleFrequency = scp.SampleFrequency;
-scpSettings.nRepeats = 1;           % CHECK
+scpSettings.nRepeats = 5;           % CHECK
 scpSettings.timestamp = datetime;
 scpSettings.scanVersion = 3; % CHECK
 
@@ -161,7 +161,7 @@ try
 % correct without having to boot up HandyScope each time.
 
 c_water = 1450; % speed of sound m/s
-Hz = 1.05e6; % CHECK
+Hz = 2e6; % CHECK
 wavelength = c_water*1e3/Hz; % in mm
 
 % ymin = 0;
@@ -182,10 +182,10 @@ wavelength = c_water*1e3/Hz; % in mm
 % raster.home = [xhome,yhome,zhome]; % home position [x,y,z] in mm     % CHECK
 % raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-raster.home = [25.3,25,17.5+5]; % home position [x,y,z] in mm     % CHECK
-raster.size = [7.5 7.5 10]; % [X,Y,Z] in mm                      % CHECK
-raster.step = [0.5^4,0.5^4,0.5^4]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
-raster.zPlane = 19.9;
+raster.home = [6.6819   15.3985   25.0000-15/2]; % home position [x,y,z] in mm     % CHECK
+raster.size = [0.001 0.001 15]; % [X,Y,Z] in mm                      % CHECK
+raster.step = [0.001,0.001,0.5^4]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
+raster.zPlane = raster.home(3); % actually the position of the xy plane in the z axis
 
 raster.pause_time = 20/1000; % s - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 

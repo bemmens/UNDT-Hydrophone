@@ -7,10 +7,11 @@ clc;
 fclose all;
 
 %% Check Savefile
-File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'NearSurface_DIYMk1_5'; % CHECK
+File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut'; % CHECK
+File_name = 'ImpulsonicDiagnostic2'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
+% Add check to make sure file save location exists
 if isfile(Save_String)
     warning('Use a unique savefile name.')
     check = input('Continue anyway? [Enter = Yes / 0 = No]:');
@@ -82,7 +83,7 @@ if exist('scp', 'var')
     
     % Trigger settings
     % Set trigger timeout: 
-    scp.TriggerTimeOut = 5; % s -> Long delay to indicate trigger not found
+    scp.TriggerTimeOut = 0; % s -> Long delay to indicate trigger not found
     
     % Disable all channel trigger sources:
     for ch = scp.Channels
@@ -112,7 +113,7 @@ end
 % Save aprameters for analysis
 scpSettings.RecordLength = scp.RecordLength;
 scpSettings.SampleFrequency = scp.SampleFrequency;
-scpSettings.nRepeats = 5;           % CHECK
+scpSettings.nRepeats = 1;           % CHECK
 scpSettings.timestamp = datetime;
 scpSettings.scanVersion = 2; % CHECK
 
@@ -161,7 +162,7 @@ try
 % correct without having to boot up HandyScope each time.
 
 c_water = 1450; % speed of sound m/s
-Hz = 1e6; % CHECK
+Hz = 2e6; % CHECK
 wavelength = c_water*1e3/Hz; % in mm
 
 % ymin = 0;
@@ -182,10 +183,9 @@ wavelength = c_water*1e3/Hz; % in mm
 % raster.home = [xhome,yhome,zhome]; % home position [x,y,z] in mm     % CHECK
 % raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-raster.home = [28.5,24.8,10.49+7]; % home position [x,y,z] in mm     % CHECK
-raster.size = [1 10 20]; % [X,Y,Z] in mm                      % CHECK
-raster.step = [0.5^2,0.5^2,0.5^4]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
-
+raster.home = [47.5 25 16]; % home position [x,y,x] in mm     % CHECK
+raster.size = [5 50 15]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
+raster.step = [2,2,2]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
 raster.pause_time = 20/1000; % s - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
 raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step(1) : (raster.home(1) + 0.5*(raster.size(1))) ;
