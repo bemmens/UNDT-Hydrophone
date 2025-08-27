@@ -1,4 +1,4 @@
-function plotProgress(mVperMPa, scpSettings, scanData, n_prog, xyz_switch, snakeCoords, raster,refresh_rate)
+function plotProgress(mVperMPa, scpSettings, scanData, xyz_switch, raster, i,j)
 
 % scanData.ab [Na,Nb,Nsamples,Nchannels,nRepeats]
 scanData_noTrigger.XY = squeeze(scanData.XY(:,:,:,1,:));
@@ -25,18 +25,11 @@ figure(1)
 subplot(1,2,1)
 t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
 switch xyz_switch
-    case  1
-        % Calculate the indices for the current coordinate
-        i = find(raster.xs == snakeCoords.XY(n_prog,1));
-        j = find(raster.ys == snakeCoords.XY(n_prog,2));
+    case 1
         plot(t,squeeze(scanData_noBias.XY(i,j,:)))
     case 2
-        i = find(raster.ys == snakeCoords.YZ(n_prog,1));
-        j = find(raster.zs == snakeCoords.YZ(n_prog,2));
         plot(t, squeeze(scanData_noBias.YZ(i,j,:)))
     case 3
-        i = find(raster.xs == snakeCoords.XZ(n_prog,1));
-        j = find(raster.zs == snakeCoords.XZ(n_prog,2));
         plot(t, squeeze(scanData_noBias.XZ(i,j,:)))
 end
 xlabel('Time [us]');

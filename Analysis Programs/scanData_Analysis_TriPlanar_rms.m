@@ -6,7 +6,7 @@ analysisVersion = 2;
 
 %% Load Data
 folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\';
-file_name = 'DIYIntChamberPD';
+file_name = 'LiveProgressTest3';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')

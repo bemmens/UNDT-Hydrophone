@@ -7,7 +7,7 @@ fclose all;
 
 %% Check Savefile
 File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'LiveProgressTest'; % CHECK
+File_name = 'LiveProgressTest4'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 % Add check to make sure file save location exists
@@ -185,7 +185,7 @@ wavelength = c_water*1e3/Hz; % in mm
 
 raster.size = [10 10 5]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
 raster.home = [25   24.5   28.6+5]; % home position [x,y,x] in mm     % CHECK
-raster.step = [1/4 1/4 1/4]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
+raster.step = [1/4 1/4 1/8]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
 raster.pause_time = 20/1000; % s - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
 raster.XY_z = raster.home(3);
@@ -348,7 +348,7 @@ for n = 1: NPointsXY
 
     % Live Progress Plot
     if mod(n,refresh_rate) == 0
-        plotProgress(mVperMPa, scpSettings, scanData, n, 1, snakeCoords, raster)
+        plotProgress(mVperMPa, scpSettings, scanData, 1, raster,i ,j)
     end
 
     % Progress tracking
@@ -397,7 +397,7 @@ for n = 1: NPointsYZ
 
     % Live Progress Plot
     if mod(n,refresh_rate) == 0
-        plotProgress(mVperMPa, scpSettings, scanData, n, 1, snakeCoords, raster)
+        plotProgress(mVperMPa, scpSettings, scanData, 2, raster,i ,j)
     end
 
     % Progress tracking
@@ -446,7 +446,7 @@ for n = 1: NPointsXZ
 
     % Live Progress Plot
     if mod(n,refresh_rate) == 0
-        plotProgress(mVperMPa, scpSettings, scanData, n, 1, snakeCoords, raster)
+        plotProgress(mVperMPa, scpSettings, scanData, 3, raster,i ,j)
     end
 
     % Progress tracking
