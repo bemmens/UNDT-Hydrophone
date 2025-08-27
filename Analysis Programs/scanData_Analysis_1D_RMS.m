@@ -4,7 +4,7 @@ clear all
 
 %% Load Data
 folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\';
-file_name = '1DTest';
+file_name = 'ImpulsonicsZScan9';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -23,7 +23,7 @@ disp(size(data))
 % Bandpass filter design
 Fs = scpSettings.SampleFrequency; % Sampling Frequency
 F0 = 2*1e6; % Centre frequency
-width = 0.15*1e6;
+width = 0.01*1e6;
 Fpass1 = F0-width; % First Passband Frequency
 Fpass2 = F0+width; % Second Passband Frequency
 
@@ -40,6 +40,7 @@ plot(data_f(50,:))
 hold off
 
 RMS = squeeze(rms(data_f - bias,2));
+% RMS = squeeze(rms(data,2));
 disp(size(RMS))
 
 %% 
@@ -52,5 +53,17 @@ y = raster.ys(1);
 %title(strcat('Scan Home: [x,y,z]=[',string(raster.home(1)),',',string(raster.home(2)),',',string(raster.home(3)),'] mm'))
 
 %% To MPa
-mVperMPa = 170.12; % CHECK
+mVperMPa = 134.36; % CHECK
 MPa = RMS*1e3/mVperMPa; 
+
+%% 
+
+plot(raster.zs,MPa)
+xlabel('Z Position [mm]')
+ylabel('MPa')
+x = raster.xs(1);
+y = raster.ys(1);
+%title(strcat('Scan Home: [x,y,z]=[',string(raster.home(1)),',',string(raster.home(2)),',',string(raster.home(3)),'] mm'))
+
+scanRMS = rms(MPa);
+disp(scanRMS)

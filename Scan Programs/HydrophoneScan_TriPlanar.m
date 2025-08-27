@@ -3,12 +3,11 @@
 
 clear all;
 close all;
-clc;
 fclose all;
 
 %% Check Savefile
-File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut'; % CHECK
-File_name = 'ImpulsonicDiagnostic2'; % CHECK
+File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\'; % CHECK
+File_name = 'DIYIntChamberPD5'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 % Add check to make sure file save location exists
@@ -116,6 +115,7 @@ scpSettings.SampleFrequency = scp.SampleFrequency;
 scpSettings.nRepeats = 1;           % CHECK
 scpSettings.timestamp = datetime;
 scpSettings.scanVersion = 2; % CHECK
+scpSettings.sensorID = 'TFS-5649-10'; %CHECK
 
 disp(strcat('Record time per measurement:',string(record_time*1e6),'us.'))
 
@@ -162,7 +162,7 @@ try
 % correct without having to boot up HandyScope each time.
 
 c_water = 1450; % speed of sound m/s
-Hz = 2e6; % CHECK
+Hz = 1e6; % CHECK
 wavelength = c_water*1e3/Hz; % in mm
 
 % ymin = 0;
@@ -183,10 +183,14 @@ wavelength = c_water*1e3/Hz; % in mm
 % raster.home = [xhome,yhome,zhome]; % home position [x,y,z] in mm     % CHECK
 % raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-raster.home = [47.5 25 16]; % home position [x,y,x] in mm     % CHECK
-raster.size = [5 50 15]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
-raster.step = [2,2,2]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
+raster.size = [10 10 3.5]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
+raster.home = [24.5   24.5   25.44+3.5/2]; % home position [x,y,x] in mm     % CHECK
+raster.step = [1/8 1/8 1/8]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
 raster.pause_time = 20/1000; % s - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
+
+raster.XY_z = 26.9;
+raster.YZ_x = raster.home(2);
+raster.XZ_y = raster.home(3);
 
 raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step(1) : (raster.home(1) + 0.5*(raster.size(1))) ;
 raster.ys = (raster.home(2) - 0.5*(raster.size(2))) : raster.step(2) : (raster.home(2) + 0.5*(raster.size(2))) ;
@@ -253,7 +257,7 @@ for j = 1:length(ys)
         xs = raster.xs;
     end
     for i = 1:length(xs)
-        snakeCoords.XY(index,:) = [xs(i), ys(j), raster.home(3)];
+        snakeCoords.XY(index,:) = [xs(i), ys(j), raster.XY_z];
         index = index +1;
     end
 end
@@ -267,7 +271,7 @@ for j = 1:length(zs)
         ys = raster.ys;
     end
     for i = 1:length(ys)
-        snakeCoords.YZ(index,:) = [raster.home(1), ys(i), zs(j)];
+        snakeCoords.YZ(index,:) = [raster.YZ_x, ys(i), zs(j)];
         index = index +1;
     end
 end
@@ -282,7 +286,7 @@ for j = 1:length(zs)
         xs = raster.xs;
     end
     for i = 1:length(xs)
-        snakeCoords.XZ(index,:) = [xs(i), raster.home(2), zs(j)];
+        snakeCoords.XZ(index,:) = [xs(i), raster.XZ_y, zs(j)];
         index = index +1;
     end
 end

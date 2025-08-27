@@ -176,7 +176,7 @@ save(Save_String,'saveData','scpSettings',"-v7.3");
 disp(strcat('File Saved: Data\',File_name,'.mat'));
 
 %% Calculate rms
-load('419kHz_2_1.mat')
+load('C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\DurabilityTest2.mat')
 mVpMPa = 150; % approx
 
 data = saveData.data(1:end,:);
@@ -198,7 +198,7 @@ figure(2)
 scatter(squeeze(saveData.timestamps(:,1:end)),MPa_rms)
 ylabel('MPa RMS')
 xlabel('Time')
-title('Noise over Time')
+% title('Noise over Time')
 
 %%
 % Bandpass filter design

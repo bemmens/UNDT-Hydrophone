@@ -5,8 +5,8 @@ clear all
 analysisVersion = 2;
 
 %% Load Data
-folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut';
-file_name = 'ImpulsonicDiagnostic1';
+folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\';
+file_name = 'DIYIntChamberPD';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -74,7 +74,7 @@ Vrms.XZ = mean(squeeze(rms(scanData_noBias.XZ,3)),3); % rms voltage at [x,y,z0]
 % Vrms.XZ = squeeze(rms(scanData_bpf.XZ,3)); % rms voltage at [x,y,z0]
 
 %% To MPa
-mVperMPa = 170.49; % CHECK
+mVperMPa = 118.87; % CHECK
 MPa.XY = Vrms.XY*1e3/mVperMPa; 
 MPa.YZ = Vrms.YZ*1e3/mVperMPa; 
 MPa.XZ = Vrms.XZ*1e3/mVperMPa; 
@@ -160,12 +160,14 @@ surf(X3, Y3, Z3, MPa.XZ', 'EdgeColor', 'none')
 % clim([0.005 0.06])
 cb = colorbar;
 cb.Label.String = 'Pressure (MPa)';
+cb.Position(1) = cb.Position(1) - 0.05; % Adjust the position of the colorbar to the right
 xlabel('x (mm)')
 ylabel('y (mm)')
 zlabel('z (mm)')
 %xlim([15,30])
 %ylim([15,33])
 
+colormap turbo
 title('Tri-Planar Scan of Acoustic Field')
 subtitle('Scan Coordinates')
 view(3)

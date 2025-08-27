@@ -8,7 +8,7 @@ fclose all;
 
 %% Check Savefile
 File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = '1DTest'; % CHECK
+File_name = 'ImpulsonicsZScan24'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 if isfile(Save_String)
@@ -115,6 +115,7 @@ scpSettings.SampleFrequency = scp.SampleFrequency;
 scpSettings.nRepeats = 1;           % CHECK
 scpSettings.timestamp = datetime;
 scpSettings.scanVersion = 3; % CHECK
+scpSettings.sensorID = 'TFS-5649-10'; %CHECK
 
 disp(strcat('Record time per measurement:',string(record_time*1e6),'us.'))
 
@@ -164,9 +165,9 @@ c_water = 1450; % speed of sound m/s
 Hz = 2e6; % CHECK
 wavelength = c_water*1e3/Hz; % in mm
 
-raster.start = [6.6819   15.3985   25.0000]; % home position [x,y,z] in mm     % CHECK
-raster.end = [6.6819   15.3985   25.0000-15];
-raster.resolution = 0.5^3*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
+raster.start = [ 6.7365   25   10]; % home position [x,y,z] in mm     % CHECK
+raster.end = [ 6.7365   25   25];
+raster.resolution = 0.5^5*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
 raster.length = norm(raster.end-raster.start);
 NPoints = round(raster.length/raster.resolution);
 raster.xs = linspace(raster.start(1),raster.end(1),NPoints);
@@ -214,15 +215,22 @@ pause('on')
 
 prog = 0;
 f = waitbar(0,'Scan Starting...');
-
+oldCoords = [raster.xs(1),raster.ys(1),raster.zs(1)];
 % Scan
 for n = 1: NPoints
     tStartStep = tic;
     
     % Move Sensor
-    xAxis.moveAbsolute(raster.xs(n), Units.LENGTH_MILLIMETRES)
-    yAxis.moveAbsolute(raster.ys(n), Units.LENGTH_MILLIMETRES)
-    zAxis.moveAbsolute(raster.zs(n), Units.LENGTH_MILLIMETRES)
+    if raster.xs(n) ~= oldCoords(1)
+        xAxis.moveAbsolute(raster.xs(n), Units.LENGTH_MILLIMETRES)
+    end
+    if raster.ys(n) ~= oldCoords(2)
+        yAxis.moveAbsolute(raster.ys(n), Units.LENGTH_MILLIMETRES)
+    end
+    if raster.zs(n) ~= oldCoords(3)
+        zAxis.moveAbsolute(raster.zs(n), Units.LENGTH_MILLIMETRES)
+    end
+    oldCoords = [raster.xs(n),raster.ys(n),raster.zs(n)];
 
     pause(raster.pause_time) % can tweak this to speed up or slow down scan: risk of shaky sensor
 

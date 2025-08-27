@@ -6,7 +6,7 @@ analysisVersion = 3;
 
 %% Load Data
 folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\';
-file_name = 'ImpulsonicsZScan1';
+file_name = 'ImpulsonicsElement124_BiPlanar3';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -35,7 +35,7 @@ scanData_noTrigger.YZ = squeeze(scanData.YZ(:,:,:,1,:));
 scanData_noBias.XY = scanData_noTrigger.XY - mean(scanData_noTrigger.XY,3);
 scanData_noBias.YZ = scanData_noTrigger.YZ - mean(scanData_noTrigger.YZ,3);
 
-disp(size(scanData_noBias.XY))
+disp(size(scanData_noBias.YZ))
 
 % %% Bandpass filter 
 % 

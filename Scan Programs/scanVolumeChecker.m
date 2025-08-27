@@ -55,8 +55,8 @@ c_water = 1450; % speed of sound m/s
 Hz = 2e6; % CHECK
 wavelength = c_water*1e3/Hz; % in mm
 
-raster.home = [47.5 25 16]; % home position [x,y,x] in mm     % CHECK
-raster.size = [5 50 15]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
+raster.home = [24.5   24.5   25.44+3.5/2]; % home position [x,y,x] in mm     % CHECK
+raster.size = [10 10 3.5]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
 raster.step = [2,2,2]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
 raster.pause_time = 50/1000; % ms - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
