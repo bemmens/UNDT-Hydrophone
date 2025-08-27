@@ -7,7 +7,7 @@ fclose all;
 
 %% Check Savefile
 File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'DIYIntChamberPD5'; % CHECK
+File_name = 'LiveProgressTest'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 % Add check to make sure file save location exists
@@ -183,14 +183,14 @@ wavelength = c_water*1e3/Hz; % in mm
 % raster.home = [xhome,yhome,zhome]; % home position [x,y,z] in mm     % CHECK
 % raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-raster.size = [10 10 3.5]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
-raster.home = [24.5   24.5   25.44+3.5/2]; % home position [x,y,x] in mm     % CHECK
-raster.step = [1/8 1/8 1/8]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
+raster.size = [10 10 5]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
+raster.home = [25   24.5   28.6+5]; % home position [x,y,x] in mm     % CHECK
+raster.step = [1/4 1/4 1/4]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
 raster.pause_time = 20/1000; % s - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
-raster.XY_z = 26.9;
-raster.YZ_x = raster.home(2);
-raster.XZ_y = raster.home(3);
+raster.XY_z = raster.home(3);
+raster.YZ_x = raster.home(1);
+raster.XZ_y = raster.home(2);
 
 raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step(1) : (raster.home(1) + 0.5*(raster.size(1))) ;
 raster.ys = (raster.home(2) - 0.5*(raster.size(2))) : raster.step(2) : (raster.home(2) + 0.5*(raster.size(2))) ;
@@ -235,8 +235,6 @@ if cont == 0
     cont = 1; 
     error('Canceled.')
 end
-
-
 
 
 %% Define Scan Sequence
@@ -297,6 +295,9 @@ scanData.XY = zeros(length(raster.xs),length(raster.ys),scp.RecordLength,2,scpSe
 scanData.YZ = zeros(length(raster.ys),length(raster.zs),scp.RecordLength,2,scpSettings.nRepeats); % [y,z,wvfm,chanel,nth repeat]
 scanData.XZ = zeros(length(raster.xs),length(raster.zs),scp.RecordLength,2,scpSettings.nRepeats); % [x,z,wvfm,chanel,nth repeat]
 
+% Live Progress
+mVperMPa=118; % Check
+refresh_rate = 20; % Check
 %% SCAN
 disp('Scan Started')
 tStart = tic;
@@ -345,6 +346,11 @@ for n = 1: NPointsXY
     % Admin
     oldCoords = snakeCoords.XY(n,:);
 
+    % Live Progress Plot
+    if mod(n,refresh_rate) == 0
+        plotProgress(mVperMPa, scpSettings, scanData, n, 1, snakeCoords, raster)
+    end
+
     % Progress tracking
     prog = prog + 1;
     dtStep = toc(tStartStep);
@@ -389,6 +395,11 @@ for n = 1: NPointsYZ
     % Admin
     oldCoords = snakeCoords.YZ(n,:);
 
+    % Live Progress Plot
+    if mod(n,refresh_rate) == 0
+        plotProgress(mVperMPa, scpSettings, scanData, n, 1, snakeCoords, raster)
+    end
+
     % Progress tracking
     prog = prog + 1;
     dtStep = toc(tStartStep);
@@ -432,6 +443,11 @@ for n = 1: NPointsXZ
 
     % Admin
     oldCoords = snakeCoords.XZ(n,:);
+
+    % Live Progress Plot
+    if mod(n,refresh_rate) == 0
+        plotProgress(mVperMPa, scpSettings, scanData, n, 1, snakeCoords, raster)
+    end
 
     % Progress tracking
     prog = prog + 1;

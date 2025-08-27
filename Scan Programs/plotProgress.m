@@ -1,4 +1,4 @@
-function plotProgress(mVperMPa, scpSettings, scanData, n_prog, xyz_switch, snakeCoords)
+function plotProgress(mVperMPa, scpSettings, scanData, n_prog, xyz_switch, snakeCoords, raster,refresh_rate)
 
 % scanData.ab [Na,Nb,Nsamples,Nchannels,nRepeats]
 scanData_noTrigger.XY = squeeze(scanData.XY(:,:,:,1,:));
@@ -22,40 +22,67 @@ MPa.XZ = Vrms.XZ*1e3/mVperMPa;
 
 %% Waveform Check
 figure(1)
+subplot(1,2,1)
 t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
 switch xyz_switch
     case  1
-        i = snakeCoords.XY(n_prog,1);
-        j = snakeCoords.XY(n_prog,2);
+        % Calculate the indices for the current coordinate
+        i = find(raster.xs == snakeCoords.XY(n_prog,1));
+        j = find(raster.ys == snakeCoords.XY(n_prog,2));
         plot(t,squeeze(scanData_noBias.XY(i,j,:)))
     case 2
-        i = snakeCoords.YZ(n_prog,1);
-        j = snakeCoords.YZ(n_prog,2);
+        i = find(raster.ys == snakeCoords.YZ(n_prog,1));
+        j = find(raster.zs == snakeCoords.YZ(n_prog,2));
         plot(t, squeeze(scanData_noBias.YZ(i,j,:)))
     case 3
-        i = snakeCoords.XZ(n_prog,1);
-        j = snakeCoords.XZ(n_prog,2);
+        i = find(raster.xs == snakeCoords.XZ(n_prog,1));
+        j = find(raster.zs == snakeCoords.XZ(n_prog,2));
         plot(t, squeeze(scanData_noBias.XZ(i,j,:)))
 end
-
+xlabel('Time [us]');
+ylabel('Voltage [V]');
 %% Plot 3D orthogonal views - CoPilot
-figure(2)
+subplot(1,2,2)
 hold on
 
 % XY plane
 [X1, Y1] = meshgrid(raster.xs, raster.ys);
 Z1 = ones(size(X1)) * raster.home(3);
 surf(X1, Y1, Z1, MPa.XY', 'EdgeColor', 'none')
+switch xyz_switch
+    case 1
+        view([0.00 90.00]) % XY
+    case 2
+        view([90.00 0.00]) % YZ
+    case 3
+        view([0.00 0.00]) % Set view for XZ plane
+end
 
 % YZ plane
 [Y2, Z2] = meshgrid(raster.ys, raster.zs);
 X2 = ones(size(Y2)) * raster.home(1);
 surf(X2, Y2, Z2, MPa.YZ', 'EdgeColor', 'none')
+switch xyz_switch
+    case 1
+        view([0.00 90.00]) % XY
+    case 2
+        view([90.00 0.00]) % YZ
+    case 3
+        view([0.00 0.00]) % Set view for XZ plane
+end
 
 % XZ plane
 [X3, Z3] = meshgrid(raster.xs, raster.zs);
 Y3 = ones(size(X3)) * raster.home(2);
 surf(X3, Y3, Z3, MPa.XZ', 'EdgeColor', 'none')
+switch xyz_switch
+    case 1
+        view([0.00 90.00]) % XY
+    case 2
+        view([90.00 0.00]) % YZ
+    case 3
+        view([0.00 0.00]) % Set view for XZ plane
+end
 
 cb = colorbar;
 cb.Label.String = 'Pressure (MPa)';
@@ -66,7 +93,6 @@ zlabel('z (mm)')
 %ylim([15,33])
 title('Tri-Planar Scan of Acoustic Field')
 subtitle('Stage Coordinates')
-view(3)
-axis vis3d
 hold off
-rotate3d
+
+
