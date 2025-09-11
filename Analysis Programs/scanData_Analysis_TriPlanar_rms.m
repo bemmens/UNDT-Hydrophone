@@ -6,7 +6,7 @@ analysisVersion = 2;
 
 %% Load Data
 folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\';
-file_name = 'LiveProgressTest3';
+file_name = ['ReliabilityTest8' ..''];
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -106,23 +106,27 @@ relX = raster.xs - raster.home(1);
 relY = raster.ys - raster.home(2);
 relZ = flip(raster.zs - raster.home(3));
 
+relXY_z = -(raster.XY_z - raster.home(3));
+relYZ_x = raster.YZ_x - raster.home(1);
+relXZ_y = raster.XZ_y - raster.home(2);
+
 %% Plot 3D orthogonal views - CoPilot
 figure(2)
 hold on
 
 % XY plane
 [X1, Y1] = meshgrid(raster.xs, raster.ys);
-Z1 = ones(size(X1)) * raster.home(3);
+Z1 = ones(size(X1))*raster.XY_z;
 surf(X1, Y1, Z1, MPa.XY', 'EdgeColor', 'none')
 
 % YZ plane
 [Y2, Z2] = meshgrid(raster.ys, raster.zs);
-X2 = ones(size(Y2)) * raster.home(1);
+X2 = ones(size(Y2)) * raster.YZ_x;
 surf(X2, Y2, Z2, MPa.YZ', 'EdgeColor', 'none')
 
 % XZ plane
 [X3, Z3] = meshgrid(raster.xs, raster.zs);
-Y3 = ones(size(X3)) * raster.home(2);
+Y3 = ones(size(X3)) * raster.XZ_y;
 surf(X3, Y3, Z3, MPa.XZ', 'EdgeColor', 'none')
 
 cb = colorbar;
@@ -145,17 +149,17 @@ hold on
 
 % XY plane
 [X1, Y1] = meshgrid(relX, relY);
-Z1 = zeros(size(X1));
+Z1 = ones(size(X1))*relXY_z;
 surf(X1, Y1, Z1, MPa.XY', 'EdgeColor', 'none')
 
 % YZ plane
 [Y2, Z2] = meshgrid(relY, relZ);
-X2 = zeros(size(Y2));
+X2 = ones(size(Y2))*relYZ_x;
 surf(X2, Y2, Z2, MPa.YZ', 'EdgeColor', 'none')
 
 % XZ plane
 [X3, Z3] = meshgrid(relX, relZ);
-Y3 = zeros(size(X3));
+Y3 = ones(size(X3))*relXZ_y;
 surf(X3, Y3, Z3, MPa.XZ', 'EdgeColor', 'none')
 % clim([0.005 0.06])
 cb = colorbar;

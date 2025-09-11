@@ -37,6 +37,7 @@ ylabel('Voltage [V]');
 %% Plot 3D orthogonal views - CoPilot
 subplot(1,2,2)
 hold on
+ax3d = gca;
 
 % XY plane
 [X1, Y1] = meshgrid(raster.xs, raster.ys);
@@ -67,7 +68,7 @@ end
 % XZ plane
 [X3, Z3] = meshgrid(raster.xs, raster.zs);
 Y3 = ones(size(X3)) * raster.home(2);
-surf(X3, Y3, Z3, MPa.XZ', 'EdgeColor', 'none')
+surf(X3, Y3, Z3, MPa.XZ', 'EdgeColor', 'none') 
 switch xyz_switch
     case 1
         view([0.00 90.00]) % XY
@@ -76,6 +77,8 @@ switch xyz_switch
     case 3
         view([0.00 0.00]) % Set view for XZ plane
 end
+
+axis(ax3d, 'equal')
 
 cb = colorbar;
 cb.Label.String = 'Pressure (MPa)';

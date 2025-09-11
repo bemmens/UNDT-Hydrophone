@@ -7,7 +7,7 @@ fclose all;
 
 %% Check Savefile
 File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'LiveProgressTest4'; % CHECK
+File_name = 'ReliabilityTest13'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 % Add check to make sure file save location exists
@@ -102,7 +102,7 @@ if exist('scp', 'var')
     clear chTr;
     
     % Set range on each channel (V)
-    scp.Channels(1).Range = 0.5 ;     % CHECK
+    scp.Channels(1).Range = 0.4 ;     % CHECK
     scp.Channels(2).Range = 5 ;     % CHECK
     
     else
@@ -112,7 +112,7 @@ end
 % Save aprameters for analysis
 scpSettings.RecordLength = scp.RecordLength;
 scpSettings.SampleFrequency = scp.SampleFrequency;
-scpSettings.nRepeats = 1;           % CHECK
+scpSettings.nRepeats = 1;           % CHECK keep at 1 for RMS just sue longer measurements to reduce SNR
 scpSettings.timestamp = datetime;
 scpSettings.scanVersion = 2; % CHECK
 scpSettings.sensorID = 'TFS-5649-10'; %CHECK
@@ -162,7 +162,7 @@ try
 % correct without having to boot up HandyScope each time.
 
 c_water = 1450; % speed of sound m/s
-Hz = 1e6; % CHECK
+Hz = 1.05e6; % CHECK
 wavelength = c_water*1e3/Hz; % in mm
 
 % ymin = 0;
@@ -184,11 +184,11 @@ wavelength = c_water*1e3/Hz; % in mm
 % raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
 raster.size = [10 10 5]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
-raster.home = [25   24.5   28.6+5]; % home position [x,y,x] in mm     % CHECK
-raster.step = [1/4 1/4 1/8]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
+raster.home = [24.3584   36.0256    1.6544+5/2]; % home position [x,y,x] in mm     % CHECK
+raster.step = [1/4 1/4 1/16]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
 raster.pause_time = 20/1000; % s - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
-raster.XY_z = raster.home(3);
+raster.XY_z = 2.43;
 raster.YZ_x = raster.home(1);
 raster.XZ_y = raster.home(2);
 
@@ -297,7 +297,7 @@ scanData.XZ = zeros(length(raster.xs),length(raster.zs),scp.RecordLength,2,scpSe
 
 % Live Progress
 mVperMPa=118; % Check
-refresh_rate = 20; % Check
+refresh_rate = 50; % Check
 %% SCAN
 disp('Scan Started')
 tStart = tic;
