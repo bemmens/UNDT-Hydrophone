@@ -6,7 +6,7 @@ analysisVersion = 3;
 
 %% Load Data
 folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\';
-file_name = 'ImpulsonicsElement124_BiPlanar3';
+file_name = 'DIYMk1_Char6';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -73,7 +73,7 @@ Vrms.YZ = mean(squeeze(rms(scanData_noBias.YZ,3)),3); % rms voltage at [x,y,z0]
 % Vrms.XZ = squeeze(rms(scanData_bpf.XZ,3)); % rms voltage at [x,y,z0]
 
 %% To MPa
-mVperMPa = 170.49; % CHECK
+mVperMPa = 151.91; % CHECK
 MPa.XY = Vrms.XY*1e3/mVperMPa; 
 MPa.YZ = Vrms.YZ*1e3/mVperMPa; 
 

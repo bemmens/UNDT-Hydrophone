@@ -6,7 +6,7 @@ analysisVersion = 2;
 
 %% Load Data
 folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\';
-file_name = ['ReliabilityTest8' ..''];
+file_name = 'ReliabilityTest8';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')

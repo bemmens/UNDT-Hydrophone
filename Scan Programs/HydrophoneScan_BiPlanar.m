@@ -8,7 +8,7 @@ fclose all;
 
 %% Check Savefile
 File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'ImpulsonicsElement124_BiPlanar3'; % CHECK
+File_name = 'DIYMk1_Char6'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 if isfile(Save_String)
@@ -62,7 +62,7 @@ if exist('scp', 'var')
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    record_time = 100/1e6; % seconds                % CHECK
+    record_time = 500/1e6; % seconds                % CHECK
     scp.RecordLength = scp.SampleFrequency*record_time; % n Samples: max = 33553920 ~ 3e7 (67107840?)    
 
     % Set pre sample ratio:
@@ -112,9 +112,10 @@ end
 % Save aprameters for analysis
 scpSettings.RecordLength = scp.RecordLength;
 scpSettings.SampleFrequency = scp.SampleFrequency;
-scpSettings.nRepeats = 5;           % CHECK
+scpSettings.nRepeats = 1;           % CHECK
 scpSettings.timestamp = datetime;
 scpSettings.scanVersion = 3; % CHECK
+scpSettings.sensorID = 'TFS-5649-8'; %CHECK
 
 disp(strcat('Record time per measurement:',string(record_time*1e6),'us.'))
 
@@ -161,7 +162,7 @@ try
 % correct without having to boot up HandyScope each time.
 
 c_water = 1450; % speed of sound m/s
-Hz = 2e6; % CHECK
+Hz = 1e6; % CHECK
 wavelength = c_water*1e3/Hz; % in mm
 
 % ymin = 0;
@@ -182,10 +183,13 @@ wavelength = c_water*1e3/Hz; % in mm
 % raster.home = [xhome,yhome,zhome]; % home position [x,y,z] in mm     % CHECK
 % raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-raster.home = [6.7365   25.0000   12.5]; % home position [x,y,z] in mm     % CHECK
-raster.size = [1.5*wavelength 5 5]; % [X,Y,Z] in mm                      % CHECK
-raster.step = [1/2,1/2,(1/2)^5]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
-raster.zPlane = raster.home(3); % actually the position of the xy plane in the z axis
+surface = 0.7383;
+raster.home = [18.17   18.8   surface+5/2]; % home position [x,y,z] in mm     % CHECK
+raster.size = [10 10 5]; % [X,Y,Z] in mm                      % CHECK
+raster.step = [1/16,1/16,1/32]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
+raster.step = [1/8,1/8,1/16]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
+
+raster.zPlane = 2.7; % the position of the xy plane in the z axis
 
 raster.pause_time = 20/1000; % s - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
@@ -277,6 +281,9 @@ end
 scanData.XY = zeros(length(raster.xs),length(raster.ys),scp.RecordLength,2,scpSettings.nRepeats); % [x,y,wvfm,chanel,nth repeat]
 scanData.YZ = zeros(length(raster.ys),length(raster.zs),scp.RecordLength,2,scpSettings.nRepeats); % [y,z,wvfm,chanel,nth repeat]
 
+%% Live Progress
+mVperMPa=151.91; % Check
+refresh_rate = 50; % Check
 %% SCAN
 disp('Scan Started')
 tStart = tic;
@@ -324,6 +331,11 @@ for n = 1: NPointsXY
     % Admin
     oldCoords = snakeCoords.XY(n,:);
 
+    % Live Progress Plot
+    if mod(n,refresh_rate) == 0
+        plotProgressBiPlanar(mVperMPa, scpSettings, scanData, 1, raster,i ,j)
+    end
+
     % Progress tracking
     prog = prog + 1;
     dtStep = toc(tStartStep);
@@ -367,6 +379,11 @@ for n = 1: NPointsYZ
 
     % Admin
     oldCoords = snakeCoords.YZ(n,:);
+
+    % Live Progress Plot
+    if mod(n,refresh_rate) == 0
+        plotProgressBiPlanar(mVperMPa, scpSettings, scanData, 2, raster,i ,j)
+    end
 
     % Progress tracking
     prog = prog + 1;
