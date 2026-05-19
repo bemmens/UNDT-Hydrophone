@@ -8,7 +8,7 @@ fclose all;
 
 %% Check Savefile
 File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'Mario_1'; % CHECK
+File_name = 'Mario_5'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 if isfile(Save_String)
@@ -58,7 +58,7 @@ if exist('scp', 'var')
     scp.MeasureMode = 2; % Block Mode
 
     % Set sample frequency:
-    MHz = 50;     % CHECK
+    MHz = 100;     % CHECK
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
@@ -102,7 +102,7 @@ if exist('scp', 'var')
     clear chTr;
     
     % Set range on each channel (V)
-    scp.Channels(1).Range = 0.5 ;     % CHECK
+    scp.Channels(1).Range = 1 ;     % CHECK
     scp.Channels(2).Range = 5 ;     % CHECK
     
     else
@@ -114,7 +114,7 @@ scpSettings.RecordLength = scp.RecordLength;
 scpSettings.SampleFrequency = scp.SampleFrequency;
 scpSettings.nRepeats = 1;           % CHECK
 scpSettings.timestamp = datetime;
-scpSettings.scanVersion = 3; % CHECK
+scpSettings.scanVersion = 4; % CHECK
 scpSettings.sensorID = 'TFS-5649-8'; %CHECK
 
 disp(strcat('Record time per measurement:',string(record_time*1e6),'us.'))
@@ -162,53 +162,26 @@ try
 % correct without having to boot up HandyScope each time.
 
 c_water = 1450; % speed of sound m/s
-Hz = 3e6; % CHECK
+Hz = 4.5e6; % CHECK
 wavelength = c_water*1e3/Hz; % in mm
 
-% ymin = 0;
-% ymax = 50;
-% xmin = 0;
-% xmax = 50;
-% zmin = 17.5;
-% zmax = 17.5+20;
-% 
-% xhome = mean([xmin,xmax]);
-% yhome = mean([ymin,ymax]);
-% zhome = mean([zmin,zmax]);
-% 
-% xsize = xmax - xmin;
-% ysize = ymax-ymin;
-% zsize = zmax-zmin;
-% 
-% raster.home = [xhome,yhome,zhome]; % home position [x,y,z] in mm     % CHECK
-% raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
-
-surface = 19.78;
-raster.home = [25.90   26.67   25.5]; % home position [x,y,z] in mm     % CHECK
-raster.size = [3 3 5]; % [X,Y,Z] in mm                      % CHECK
-% raster.step = [1/16,1/16,1/32]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
-raster.step = [1/4,1/4,1/16]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
-
-raster.zPlane = raster.home(3); % the position of the xy plane in the z axis
-% raster.zPlane = 11.28; % the position of the xy plane in the z axis
+raster.home = [27.45   30   11.76]; % home position [x,y,z] in mm     % CHECK
+raster.size = [3 3 0]; % [X,Y] in mm                      % CHECK
+raster.step = [1/4,1/4,1]*wavelength; % [dx,dy] mm - must be greater than zero          % CHECK
 
 raster.pause_time = 20/1000; % s - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
 raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step(1) : (raster.home(1) + 0.5*(raster.size(1))) ;
 raster.ys = (raster.home(2) - 0.5*(raster.size(2))) : raster.step(2) : (raster.home(2) + 0.5*(raster.size(2))) ;
-raster.zs = (raster.home(3) - 0.5*(raster.size(3))) : raster.step(3) : (raster.home(3) + 0.5*(raster.size(3))) ;
 
 raster.xlims = [min(raster.xs),max(raster.xs)];
 raster.ylims = [min(raster.ys),max(raster.ys)];
-raster.zlims = [min(raster.zs),max(raster.zs)];
 
-NPoints = length(raster.xs)*length(raster.ys) + length(raster.ys)*length(raster.zs);
+NPoints = length(raster.xs)*length(raster.ys);
 
 if min(raster.home - raster.size/2) < 0
     error('ERROR: raster.size too big')
 elseif raster.home + raster.size/2 > 50
-    error('ERROR: raster.size too big')
-elseif raster.home(3) + raster.size(3)/2 > 40
     error('ERROR: raster.size too big')
 elseif min(raster.home - raster.size/2) == 0
     warning('RASTER LIMIT = AXIS LIMIT')
@@ -246,15 +219,11 @@ if cont == 0
 end
 
 
-
-
 %% Define Scan Sequence
 snakeCoords.XY = zeros(length(raster.xs)*length(raster.ys),3);
-snakeCoords.YZ = zeros(length(raster.ys)*length(raster.zs),3);
 
 ys = raster.ys;
 xs = raster.xs;
-zs = flip(raster.zs); % invert z-axis: start at the bottom
 
 % XY
 index = 1;
@@ -265,21 +234,7 @@ for j = 1:length(ys)
         xs = raster.xs;
     end
     for i = 1:length(xs)
-        snakeCoords.XY(index,:) = [xs(i), ys(j), raster.zPlane];
-        index = index +1;
-    end
-end
-
-% YZ
-index = 1;
-for j = 1:length(zs)
-    if ys(end) == max(ys)
-        ys = flip(raster.ys);
-    else
-        ys = raster.ys;
-    end
-    for i = 1:length(ys)
-        snakeCoords.YZ(index,:) = [raster.home(1), ys(i), zs(j)];
+        snakeCoords.XY(index,:) = [xs(i), ys(j), raster.home(3)];
         index = index +1;
     end
 end
@@ -287,7 +242,6 @@ end
 %% Create results struct
 
 scanData.XY = zeros(length(raster.xs),length(raster.ys),scp.RecordLength,2,scpSettings.nRepeats); % [x,y,wvfm,chanel,nth repeat]
-scanData.YZ = zeros(length(raster.ys),length(raster.zs),scp.RecordLength,2,scpSettings.nRepeats); % [y,z,wvfm,chanel,nth repeat]
 
 %% Live Progress
 mVperMPa=151.91; % Check
@@ -303,7 +257,6 @@ f = waitbar(0,'Scan Starting...');
 oldCoords = raster.home;
 
 NPointsXY = length(snakeCoords.XY(:,1));
-NPointsYZ = length(snakeCoords.YZ(:,1));
 
 % XY Scan
 for n = 1: NPointsXY
@@ -339,59 +292,10 @@ for n = 1: NPointsXY
     % Admin
     oldCoords = snakeCoords.XY(n,:);
 
-    % Live Progress Plot
-    if mod(n,refresh_rate) == 0
-        plotProgressBiPlanar(mVperMPa, scpSettings, scanData, 1, raster,i ,j)
-    end
-
-    % Progress tracking
-    prog = prog + 1;
-    dtStep = toc(tStartStep);
-    progFrac = prog/NPoints; 
-    NPointsRemaining = NPoints - prog;
-    estTimeRemaining = round(NPointsRemaining*dtStep/60); % minutes
-    f = waitbar((progFrac),f,strcat("Scan Running... Estimated Time Remaining: ", string(estTimeRemaining),'mins'));
-
-end
-
-% YZ Scan
-for n = 1: NPointsYZ
-    tStartStep = tic;
-    
-    % Move Sensor
-    % Only engage axis if position has changed
-    if snakeCoords.YZ(n,1) ~= oldCoords(1)
-        xAxis.moveAbsolute(snakeCoords.YZ(n,1), Units.LENGTH_MILLIMETRES)
-    end
-    if snakeCoords.YZ(n,2) ~= oldCoords(2)
-        yAxis.moveAbsolute(snakeCoords.YZ(n,2), Units.LENGTH_MILLIMETRES)
-    end
-    if snakeCoords.YZ(n,3) ~= oldCoords(3)
-        zAxis.moveAbsolute(snakeCoords.YZ(n,3), Units.LENGTH_MILLIMETRES)
-    end
-
-    pause(raster.pause_time) % can tweak this to speed up or slow down scan: risk of shaky sensor
-
-    % Calculate the indices for the current coordinate
-    i = find(raster.ys == snakeCoords.YZ(n,2));
-    j = find(raster.zs == snakeCoords.YZ(n,3));
-
-    % Take measurement
-    for r = 1:scpSettings.nRepeats
-        
-        [scp, measurement] = takeMeasOscilloscope( scp );
-      
-        % Store the measurement in the data array
-        scanData.YZ(i,j,:,:,r) = measurement(:,1:2);
-    end
-
-    % Admin
-    oldCoords = snakeCoords.YZ(n,:);
-
-    % Live Progress Plot
-    if mod(n,refresh_rate) == 0
-        plotProgressBiPlanar(mVperMPa, scpSettings, scanData, 2, raster,i ,j)
-    end
+    % % Live Progress Plot
+    % if mod(n,refresh_rate) == 0
+    %     plotProgressBiPlanar(mVperMPa, scpSettings, scanData, 1, raster,i ,j)
+    % end
 
     % Progress tracking
     prog = prog + 1;

@@ -45,7 +45,7 @@ if exist('scp', 'var')
     scp.MeasureMode = 2; % Block Mode
 
     % Set sample frequency:
-    MHz = 50;     % CHECK
+    MHz = 100;     % CHECK
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
@@ -118,8 +118,8 @@ scpSettings.timestamp = datetime; % start time of day
 
 %% Bandpass filter 
 Fs = scpSettings.SampleFrequency; % Sampling Frequency
-F0 = 1*1e6; % Centre
-width = 0.1*1e6;
+F0 = 4.5*1e6; % Centre
+width = 0.3*1e6;
 Fpass1 = F0-width; % First Passband Frequency
 Fpass2 = F0+width; % Second Passband Frequency
 
