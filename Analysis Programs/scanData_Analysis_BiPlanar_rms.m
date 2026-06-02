@@ -35,7 +35,7 @@ scanData_noTrigger.YZ = squeeze(scanData.YZ(:,:,:,1,:));
 scanData_noBias.XY = scanData_noTrigger.XY - mean(scanData_noTrigger.XY,3);
 scanData_noBias.YZ = scanData_noTrigger.YZ - mean(scanData_noTrigger.YZ,3);
 
-disp(size(scanData_noBias.XY))
+disp(size(scanData_noBias.YZ))
 
 % %% Bandpass filter 
 % 
@@ -73,7 +73,7 @@ Vrms.YZ = mean(squeeze(rms(scanData_noBias.YZ,3)),3); % rms voltage at [x,y,z0]
 % Vrms.XZ = squeeze(rms(scanData_bpf.XZ,3)); % rms voltage at [x,y,z0]
 
 %% To MPa
-mVperMPa = 170.49; % CHECK
+mVperMPa = 151.91; % CHECK
 MPa.XY = Vrms.XY*1e3/mVperMPa; 
 MPa.YZ = Vrms.YZ*1e3/mVperMPa; 
 

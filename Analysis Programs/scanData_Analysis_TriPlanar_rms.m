@@ -39,9 +39,9 @@ scanData_noBias.XZ = scanData_noTrigger.XZ - mean(scanData_noTrigger.XZ,3);
 
 %% Bandpass filter 
 
-x_index = 15;
-y_index = 15;
-z_index = 10;
+x_index = 1;
+y_index = 1;
+z_index = 1;
 
 Fs = scpSettings.SampleFrequency; % Sampling Frequency
 F0 = 1*1e6; % Centre
@@ -74,7 +74,7 @@ Vrms.XZ = mean(squeeze(rms(scanData_noBias.XZ,3)),3); % rms voltage at [x,y,z0]
 % Vrms.XZ = squeeze(rms(scanData_bpf.XZ,3)); % rms voltage at [x,y,z0]
 
 %% To MPa
-mVperMPa = 170.49; % CHECK
+mVperMPa = 118.87; % CHECK
 MPa.XY = Vrms.XY*1e3/mVperMPa; 
 MPa.YZ = Vrms.YZ*1e3/mVperMPa; 
 MPa.XZ = Vrms.XZ*1e3/mVperMPa; 
@@ -106,23 +106,27 @@ relX = raster.xs - raster.home(1);
 relY = raster.ys - raster.home(2);
 relZ = flip(raster.zs - raster.home(3));
 
+relXY_z = -(raster.XY_z - raster.home(3));
+relYZ_x = raster.YZ_x - raster.home(1);
+relXZ_y = raster.XZ_y - raster.home(2);
+
 %% Plot 3D orthogonal views - CoPilot
 figure(2)
 hold on
 
 % XY plane
 [X1, Y1] = meshgrid(raster.xs, raster.ys);
-Z1 = ones(size(X1)) * raster.home(3);
+Z1 = ones(size(X1))*raster.XY_z;
 surf(X1, Y1, Z1, MPa.XY', 'EdgeColor', 'none')
 
 % YZ plane
 [Y2, Z2] = meshgrid(raster.ys, raster.zs);
-X2 = ones(size(Y2)) * raster.home(1);
+X2 = ones(size(Y2)) * raster.YZ_x;
 surf(X2, Y2, Z2, MPa.YZ', 'EdgeColor', 'none')
 
 % XZ plane
 [X3, Z3] = meshgrid(raster.xs, raster.zs);
-Y3 = ones(size(X3)) * raster.home(2);
+Y3 = ones(size(X3)) * raster.XZ_y;
 surf(X3, Y3, Z3, MPa.XZ', 'EdgeColor', 'none')
 
 cb = colorbar;
@@ -145,27 +149,29 @@ hold on
 
 % XY plane
 [X1, Y1] = meshgrid(relX, relY);
-Z1 = zeros(size(X1));
+Z1 = ones(size(X1))*relXY_z;
 surf(X1, Y1, Z1, MPa.XY', 'EdgeColor', 'none')
 
 % YZ plane
 [Y2, Z2] = meshgrid(relY, relZ);
-X2 = zeros(size(Y2));
+X2 = ones(size(Y2))*relYZ_x;
 surf(X2, Y2, Z2, MPa.YZ', 'EdgeColor', 'none')
 
 % XZ plane
 [X3, Z3] = meshgrid(relX, relZ);
-Y3 = zeros(size(X3));
+Y3 = ones(size(X3))*relXZ_y;
 surf(X3, Y3, Z3, MPa.XZ', 'EdgeColor', 'none')
 % clim([0.005 0.06])
 cb = colorbar;
 cb.Label.String = 'Pressure (MPa)';
+cb.Position(1) = cb.Position(1) - 0.05; % Adjust the position of the colorbar to the right
 xlabel('x (mm)')
 ylabel('y (mm)')
 zlabel('z (mm)')
 %xlim([15,30])
 %ylim([15,33])
 
+colormap turbo
 title('Tri-Planar Scan of Acoustic Field')
 subtitle('Scan Coordinates')
 view(3)

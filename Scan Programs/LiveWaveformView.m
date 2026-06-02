@@ -92,7 +92,7 @@ if exist('scp', 'var')
     scp.Channels(1).Range = 0.5 ;     % CHECK
     scp.Channels(2).Range = 5 ;     % CHECK
     
-    else
+else
     warning('No Scope Detected')
 end
 
@@ -107,8 +107,8 @@ disp(scp.SampleFrequency/1e6)
 disp(record_time*1e6)
 
 %%
-refreshRate = 1*1e0; % seconds
-maxRunTime = 1*60; % seconds
+refreshRate = 1*1e0; % seconds between measurements
+maxRunTime = 60*60; % seconds
 saveData.data = zeros(maxRunTime/refreshRate,scpSettings.RecordLength); % counter,wvfm
 saveData.timestamps = zeros(1,maxRunTime/refreshRate);
 
@@ -164,15 +164,23 @@ end
 
 %%
 
-File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'test'; % CHECK
+File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\'; % CHECK
+File_name = 'DurabilityTest1'; % CHECK
 Save_String=strcat(File_loc,File_name,'.mat');
+
+% Ask for input to confirm save
+confirmSave = input('Do you want to save the data? (y/n): ', 's');
+if lower(confirmSave) ~= 'y'
+    disp('Data not saved.');
+    return;
+end
+
 save(Save_String,'saveData','scpSettings',"-v7.3");
 disp(strcat('File Saved: Data\',File_name,'.mat'));
 
 %% Calculate rms
-load('419kHz_2_1.mat')
-mVpMPa = 150; % approx
+load('DurabilityTest2.mat')
+mVpMPa = 118.87; % approx
 
 data = saveData.data(1:end,:);
 t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
@@ -182,7 +190,7 @@ figure(1)
 plot(t,MPa(1,:))
 ylabel('MPa')
 xlabel('Time [us]')
-title('Example Noise')
+% title('Example Noise')
 
 bias = mean(data,2);
 mVrms =  rms(data-bias,2)*1e3;
@@ -193,12 +201,12 @@ figure(2)
 scatter(squeeze(saveData.timestamps(:,1:end)),MPa_rms)
 ylabel('MPa RMS')
 xlabel('Time')
-title('Noise over Time')
+% title('Noise over Time')
 
 %%
 % Bandpass filter design
 Fs = scpSettings.SampleFrequency; % Sampling Frequency
-F0 = 0.419*1e6; % Centre
+F0 = 1*1e6; % Centre
 width = 0.15*1e6;
 Fpass1 = F0-width; % First Passband Frequency
 Fpass2 = F0+width; % Second Passband Frequency

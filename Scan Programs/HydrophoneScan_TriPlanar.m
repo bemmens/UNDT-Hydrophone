@@ -3,14 +3,14 @@
 
 clear all;
 close all;
-clc;
 fclose all;
 
 %% Check Savefile
-File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'NearSurface_DIYMk1_5'; % CHECK
+File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\'; % CHECK
+File_name = 'ReliabilityTest13'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
+% Add check to make sure file save location exists
 if isfile(Save_String)
     warning('Use a unique savefile name.')
     check = input('Continue anyway? [Enter = Yes / 0 = No]:');
@@ -82,7 +82,7 @@ if exist('scp', 'var')
     
     % Trigger settings
     % Set trigger timeout: 
-    scp.TriggerTimeOut = 5; % s -> Long delay to indicate trigger not found
+    scp.TriggerTimeOut = 0; % s -> Long delay to indicate trigger not found
     
     % Disable all channel trigger sources:
     for ch = scp.Channels
@@ -102,7 +102,7 @@ if exist('scp', 'var')
     clear chTr;
     
     % Set range on each channel (V)
-    scp.Channels(1).Range = 0.5 ;     % CHECK
+    scp.Channels(1).Range = 0.4 ;     % CHECK
     scp.Channels(2).Range = 5 ;     % CHECK
     
     else
@@ -112,9 +112,10 @@ end
 % Save aprameters for analysis
 scpSettings.RecordLength = scp.RecordLength;
 scpSettings.SampleFrequency = scp.SampleFrequency;
-scpSettings.nRepeats = 5;           % CHECK
+scpSettings.nRepeats = 1;           % CHECK keep at 1 for RMS just sue longer measurements to reduce SNR
 scpSettings.timestamp = datetime;
 scpSettings.scanVersion = 2; % CHECK
+scpSettings.sensorID = 'TFS-5649-10'; %CHECK
 
 disp(strcat('Record time per measurement:',string(record_time*1e6),'us.'))
 
@@ -161,7 +162,7 @@ try
 % correct without having to boot up HandyScope each time.
 
 c_water = 1450; % speed of sound m/s
-Hz = 1e6; % CHECK
+Hz = 1.05e6; % CHECK
 wavelength = c_water*1e3/Hz; % in mm
 
 % ymin = 0;
@@ -182,11 +183,14 @@ wavelength = c_water*1e3/Hz; % in mm
 % raster.home = [xhome,yhome,zhome]; % home position [x,y,z] in mm     % CHECK
 % raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-raster.home = [28.5,24.8,10.49+7]; % home position [x,y,z] in mm     % CHECK
-raster.size = [1 10 20]; % [X,Y,Z] in mm                      % CHECK
-raster.step = [0.5^2,0.5^2,0.5^4]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
-
+raster.size = [10 10 5]; % [X,Y,Z] in mm - max [50,50,40]                  % CHECK
+raster.home = [24.3584   36.0256    1.6544+5/2]; % home position [x,y,x] in mm     % CHECK
+raster.step = [1/4 1/4 1/16]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
 raster.pause_time = 20/1000; % s - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
+
+raster.XY_z = 2.43;
+raster.YZ_x = raster.home(1);
+raster.XZ_y = raster.home(2);
 
 raster.xs = (raster.home(1) - 0.5*(raster.size(1))) : raster.step(1) : (raster.home(1) + 0.5*(raster.size(1))) ;
 raster.ys = (raster.home(2) - 0.5*(raster.size(2))) : raster.step(2) : (raster.home(2) + 0.5*(raster.size(2))) ;
@@ -233,8 +237,6 @@ if cont == 0
 end
 
 
-
-
 %% Define Scan Sequence
 snakeCoords.XY = zeros(length(raster.xs)*length(raster.ys),3);
 snakeCoords.YZ = zeros(length(raster.ys)*length(raster.zs),3);
@@ -253,7 +255,7 @@ for j = 1:length(ys)
         xs = raster.xs;
     end
     for i = 1:length(xs)
-        snakeCoords.XY(index,:) = [xs(i), ys(j), raster.home(3)];
+        snakeCoords.XY(index,:) = [xs(i), ys(j), raster.XY_z];
         index = index +1;
     end
 end
@@ -267,7 +269,7 @@ for j = 1:length(zs)
         ys = raster.ys;
     end
     for i = 1:length(ys)
-        snakeCoords.YZ(index,:) = [raster.home(1), ys(i), zs(j)];
+        snakeCoords.YZ(index,:) = [raster.YZ_x, ys(i), zs(j)];
         index = index +1;
     end
 end
@@ -282,7 +284,7 @@ for j = 1:length(zs)
         xs = raster.xs;
     end
     for i = 1:length(xs)
-        snakeCoords.XZ(index,:) = [xs(i), raster.home(2), zs(j)];
+        snakeCoords.XZ(index,:) = [xs(i), raster.XZ_y, zs(j)];
         index = index +1;
     end
 end
@@ -293,6 +295,9 @@ scanData.XY = zeros(length(raster.xs),length(raster.ys),scp.RecordLength,2,scpSe
 scanData.YZ = zeros(length(raster.ys),length(raster.zs),scp.RecordLength,2,scpSettings.nRepeats); % [y,z,wvfm,chanel,nth repeat]
 scanData.XZ = zeros(length(raster.xs),length(raster.zs),scp.RecordLength,2,scpSettings.nRepeats); % [x,z,wvfm,chanel,nth repeat]
 
+% Live Progress
+mVperMPa=118; % Check
+refresh_rate = 50; % Check
 %% SCAN
 disp('Scan Started')
 tStart = tic;
@@ -341,6 +346,11 @@ for n = 1: NPointsXY
     % Admin
     oldCoords = snakeCoords.XY(n,:);
 
+    % Live Progress Plot
+    if mod(n,refresh_rate) == 0
+        plotProgress(mVperMPa, scpSettings, scanData, 1, raster,i ,j)
+    end
+
     % Progress tracking
     prog = prog + 1;
     dtStep = toc(tStartStep);
@@ -385,6 +395,11 @@ for n = 1: NPointsYZ
     % Admin
     oldCoords = snakeCoords.YZ(n,:);
 
+    % Live Progress Plot
+    if mod(n,refresh_rate) == 0
+        plotProgress(mVperMPa, scpSettings, scanData, 2, raster,i ,j)
+    end
+
     % Progress tracking
     prog = prog + 1;
     dtStep = toc(tStartStep);
@@ -428,6 +443,11 @@ for n = 1: NPointsXZ
 
     % Admin
     oldCoords = snakeCoords.XZ(n,:);
+
+    % Live Progress Plot
+    if mod(n,refresh_rate) == 0
+        plotProgress(mVperMPa, scpSettings, scanData, 3, raster,i ,j)
+    end
 
     % Progress tracking
     prog = prog + 1;

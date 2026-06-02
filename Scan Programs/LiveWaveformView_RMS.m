@@ -45,11 +45,11 @@ if exist('scp', 'var')
     scp.MeasureMode = 2; % Block Mode
 
     % Set sample frequency:
-    MHz = 10;     % CHECK
+    MHz = 100;     % CHECK
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    record_time = 500/1e6; % s                % CHECK
+    record_time = 80/1e6; % s                % CHECK
     scp.RecordLength = scp.SampleFrequency*record_time; % n Samples: max = 33553920 ~ 3e7 (67107840?)    
 
     % Set pre sample ratio:
@@ -118,8 +118,8 @@ scpSettings.timestamp = datetime; % start time of day
 
 %% Bandpass filter 
 Fs = scpSettings.SampleFrequency; % Sampling Frequency
-F0 = 1*1e6; % Centre
-width = 0.1*1e6;
+F0 = 4.5*1e6; % Centre
+width = 0.3*1e6;
 Fpass1 = F0-width; % First Passband Frequency
 Fpass2 = F0+width; % Second Passband Frequency
 
@@ -176,7 +176,7 @@ save(Save_String,'saveData','scpSettings',"-v7.3");
 disp(strcat('File Saved: Data\',File_name,'.mat'));
 
 %% Calculate rms
-load('419kHz_2_1.mat')
+load('C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\DurabilityTest2.mat')
 mVpMPa = 150; % approx
 
 data = saveData.data(1:end,:);
@@ -198,7 +198,7 @@ figure(2)
 scatter(squeeze(saveData.timestamps(:,1:end)),MPa_rms)
 ylabel('MPa RMS')
 xlabel('Time')
-title('Noise over Time')
+% title('Noise over Time')
 
 %%
 % Bandpass filter design

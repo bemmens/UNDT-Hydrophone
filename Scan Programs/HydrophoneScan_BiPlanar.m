@@ -7,8 +7,8 @@ clc;
 fclose all;
 
 %% Check Savefile
-File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'NearSurface_DIYMk1_19'; % CHECK
+File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\'; % CHECK
+File_name = 'Mario_1'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 if isfile(Save_String)
@@ -62,7 +62,7 @@ if exist('scp', 'var')
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    record_time = 100/1e6; % seconds                % CHECK
+    record_time = 300/1e6; % seconds                % CHECK
     scp.RecordLength = scp.SampleFrequency*record_time; % n Samples: max = 33553920 ~ 3e7 (67107840?)    
 
     % Set pre sample ratio:
@@ -82,7 +82,7 @@ if exist('scp', 'var')
     
     % Trigger settings
     % Set trigger timeout: 
-    scp.TriggerTimeOut = 5; % s -> Long delay to indicate trigger not found
+    scp.TriggerTimeOut = 0; % s -> Long delay to indicate trigger not found
     
     % Disable all channel trigger sources:
     for ch = scp.Channels
@@ -115,6 +115,7 @@ scpSettings.SampleFrequency = scp.SampleFrequency;
 scpSettings.nRepeats = 1;           % CHECK
 scpSettings.timestamp = datetime;
 scpSettings.scanVersion = 3; % CHECK
+scpSettings.sensorID = 'TFS-5649-8'; %CHECK
 
 disp(strcat('Record time per measurement:',string(record_time*1e6),'us.'))
 
@@ -133,7 +134,7 @@ end
 import zaber.motion.ascii.Connection;
 import zaber.motion.Units;
 
-connection = Connection.openSerialPort('COM4');                         %CHECK
+connection = Connection.openSerialPort('COM5');                         %CHECK
 try
     connection.enableAlerts();
 
@@ -161,7 +162,7 @@ try
 % correct without having to boot up HandyScope each time.
 
 c_water = 1450; % speed of sound m/s
-Hz = 1.05e6; % CHECK
+Hz = 3e6; % CHECK
 wavelength = c_water*1e3/Hz; % in mm
 
 % ymin = 0;
@@ -182,10 +183,14 @@ wavelength = c_water*1e3/Hz; % in mm
 % raster.home = [xhome,yhome,zhome]; % home position [x,y,z] in mm     % CHECK
 % raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-raster.home = [25.3,25,17.5+5]; % home position [x,y,z] in mm     % CHECK
-raster.size = [7.5 7.5 10]; % [X,Y,Z] in mm                      % CHECK
-raster.step = [0.5^4,0.5^4,0.5^4]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
-raster.zPlane = 19.9;
+surface = 19.78;
+raster.home = [25.90   26.67   25.5]; % home position [x,y,z] in mm     % CHECK
+raster.size = [3 3 5]; % [X,Y,Z] in mm                      % CHECK
+% raster.step = [1/16,1/16,1/32]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
+raster.step = [1/4,1/4,1/16]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
+
+raster.zPlane = raster.home(3); % the position of the xy plane in the z axis
+% raster.zPlane = 11.28; % the position of the xy plane in the z axis
 
 raster.pause_time = 20/1000; % s - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
@@ -215,7 +220,8 @@ disp(raster.size)
 disp(raster.step)
 disp(NPoints)
 
-cont = input('Continue? [Yes = enter, No = 0]:');
+
+cont = input('Move to HOME? [Yes = enter, No = 0]:');
 if cont == 0
     cont = 1; 
     error('Canceled.')
@@ -227,7 +233,13 @@ yAxis.moveAbsolute(raster.home(2), Units.LENGTH_MILLIMETRES)
 zAxis.moveAbsolute(raster.home(3), Units.LENGTH_MILLIMETRES)
 disp('DONE')
 
-cont = input('Continue? [Yes = enter, No = 0]:');
+cont = input('FOH BIASED? [Yes = enter, No = 0]:');
+if cont == 0
+    cont = 1; 
+    error('Canceled.')
+end
+
+cont = input('Begin? [Yes = enter, No = 0]:');
 if cont == 0
     cont = 1; 
     error('Canceled.')
@@ -277,6 +289,9 @@ end
 scanData.XY = zeros(length(raster.xs),length(raster.ys),scp.RecordLength,2,scpSettings.nRepeats); % [x,y,wvfm,chanel,nth repeat]
 scanData.YZ = zeros(length(raster.ys),length(raster.zs),scp.RecordLength,2,scpSettings.nRepeats); % [y,z,wvfm,chanel,nth repeat]
 
+%% Live Progress
+mVperMPa=151.91; % Check
+refresh_rate = 50; % Check
 %% SCAN
 disp('Scan Started')
 tStart = tic;
@@ -324,6 +339,11 @@ for n = 1: NPointsXY
     % Admin
     oldCoords = snakeCoords.XY(n,:);
 
+    % Live Progress Plot
+    if mod(n,refresh_rate) == 0
+        plotProgressBiPlanar(mVperMPa, scpSettings, scanData, 1, raster,i ,j)
+    end
+
     % Progress tracking
     prog = prog + 1;
     dtStep = toc(tStartStep);
@@ -367,6 +387,11 @@ for n = 1: NPointsYZ
 
     % Admin
     oldCoords = snakeCoords.YZ(n,:);
+
+    % Live Progress Plot
+    if mod(n,refresh_rate) == 0
+        plotProgressBiPlanar(mVperMPa, scpSettings, scanData, 2, raster,i ,j)
+    end
 
     % Progress tracking
     prog = prog + 1;

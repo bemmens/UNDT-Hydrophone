@@ -1,5 +1,5 @@
-File_loc = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'TankConnectorMk5_24'; % CHECK
+File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\'; % CHECK
+File_name = 'DurabilityTest1'; % CHECK
 Save_String=strcat(File_loc,File_name,'.mat');
 load(Save_String)
 
