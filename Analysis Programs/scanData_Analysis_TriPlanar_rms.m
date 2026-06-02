@@ -5,8 +5,8 @@ clear all
 analysisVersion = 2;
 
 %% Load Data
-folder_path = 'C:\Users\gv19838\OneDrive - University of Bristol\PhD\Hydrophone\UNDT-Hydrophone\DataOut\';
-file_name = 'NearSurface_DIYMk1_4';
+folder_path = '/Users/gv19838/Library/CloudStorage/OneDrive-UniversityofBristol/PhD/Hydrophone/UNDT-Hydrophone/DataOut/';
+file_name = 'DIYMk1_38';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')

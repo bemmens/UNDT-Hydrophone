@@ -6,7 +6,7 @@ analysisVersion = 3;
 
 %% Load Data
 folder_path = '/Users/gv19838/Library/CloudStorage/OneDrive-UniversityofBristol/PhD/Hydrophone/UNDT-Hydrophone/DataOut/';
-file_name = 'PSV_3MHz_0mm_4';
+file_name = 'DIYMk1_Char2';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -39,38 +39,14 @@ disp(size(scanData_noBias.XY))
 
 % %% Bandpass filter 
 % 
-x_index = 13;
-y_index = 13;
+x_index = 20;
+y_index = 40;
 z_index = 5;
 
 
-% Fs = scpSettings.SampleFrequency; % Sampling Frequency
-% F0 = 1*1e6; % Centre
-% width = 0.25*1e6;
-% Fpass1 = 5e5; % First Passband Frequency
-% Fpass2 = F0+width; % Second Passband Frequency
-% 
-% % Apply the bandpass filter
-% figure(1)
-% bandpass(squeeze(scanData_noBias.XY(x_index,y_index,:))', [Fpass1 Fpass2], Fs)
-% [~,bpfilter] = bandpass(squeeze(scanData_noBias.XY(x_index,y_index,:))', [Fpass1 Fpass2], Fs);
-% 
-% scanData_bpf.XY = filter( bpfilter.Coefficients, 1, scanData_noBias.XY, [], 3);
-% scanData_bpf.YZ = filter( bpfilter.Coefficients, 1, scanData_noBias.YZ, [], 3);
-% 
-% figure(100)
-% plot(t,squeeze(scanData_bpf.XY(x_index,y_index,:,1)))
-% hold on
-% %plot(t,squeeze(scanData_noBias.XY(10,10,:)))
-% hold off
-% %xlim([100,150])
 %% With nRpeats
 Vrms.XY = mean(squeeze(rms(scanData_noBias.XY,3)),3); % rms voltage at [x,y,z0]
 Vrms.YZ = mean(squeeze(rms(scanData_noBias.YZ,3)),3); % rms voltage at [x,y,z0]
-
-% Vrms.XY = squeeze(rms(scanData_bpf.XY,3)); % rms voltage at [x,y,z0]
-% Vrms.YZ = squeeze(rms(scanData_bpf.YZ,3)); % rms voltage at [x,y,z0]
-% Vrms.XZ = squeeze(rms(scanData_bpf.XZ,3)); % rms voltage at [x,y,z0]
 
 %% To MPa
 mVperMPa = 170.49; % CHECK
@@ -110,19 +86,93 @@ else
     wvfmData_max = squeeze(scanData_noBias.YZ(max_y_idx, max_z_idx, :, max_repeat))*1e3/mVperMPa;
 end
 %% Plots
-figure(1)
+
+figure()
 plot(t, wvfmData_max)
 hold on
 % Get location information
 if maxValueXY >= maxValueYZ
+    x = raster.xs(max_x_idx);
+    y = raster.ys(max_y_idx);
     max_location = ['x=', num2str(raster.xs(max_x_idx)), ', y=', num2str(raster.ys(max_y_idx)), ', z=', num2str(raster.zPlane)];
 else
+    y = raster.ys(max_y_idx);
+    z = raster.zs(max_z_idx);
     max_location = ['x=', num2str(raster.home(1)), ', y=', num2str(raster.ys(max_y_idx)), ', z=', num2str(raster.zs(max_z_idx))];
 end
+% Plot horizontal line at RMS of the pressure line
+yline(rms(wvfmData_max(pkrangeidx(1):pkrangeidx(2))));
+% Add horizontal lines for the RMS of a sine wave with the same amplitude as the peak
+Amp = max(wvfmData_max);
+sine_rms = Amp / sqrt(2); % RMS of a sine wave with amplitude A
+yline(sine_rms,'--');
+legend('Waveform', 'RMS', 'Location', 'best');
+% Calculate RMS and max values for the waveform
+wvfm_rms = rms(wvfmData_max(pkrangeidx(1):pkrangeidx(2)));
+wvfm_max = max(abs(wvfmData_max));
+% Add RMS and max values to the subtitle
+subtitle(sprintf('RMS = %.3f MPa, Max = %.3f MPa', wvfm_rms, wvfm_max));
 title(['Maximum Amplitude Waveform at [', max_location, '] mm'])
 xlabel('Time [us]');
 ylabel('Amplitude [MPa]');
+legend('Waveform', 'RMS', 'RMS of Sine', 'Location', 'Best');
 hold off
+
+%%
+
+% Plot pressure along the YZ line that contains the overall maximum
+% Determine y index of overall maximum if not already available
+
+[maxValueYZ, maxIndexYZ] = max(abs(scanData_noBias.YZ(:)));
+[max_y_idx, ~, ~, ~] = ind2sub(size(scanData_noBias.YZ), maxIndexYZ);
+
+y_line_idx = max_y_idx;
+pressure_line = MPa.YZ(y_line_idx, :);   % MPa.YZ rows = y, cols = z
+zvals = raster.zs;
+
+figure()
+plot(zvals, pressure_line)
+hold on
+[~, zmax_idx] = max(abs(pressure_line));
+plot(zvals(zmax_idx), pressure_line(zmax_idx), 'r*', 'MarkerSize',10)
+
+hold off
+grid on
+xlabel('Z (mm)')
+ylabel('RMS Pressure (MPa)')
+title(sprintf('Pressure vs Z at y = %.2f mm (index %d)', raster.ys(y_line_idx), y_line_idx))
+legend('Pressure', 'Max (abs)', 'Location', 'Best')
+
+% Fit a sine to the pressure_line vs zvals using dominant spatial frequency (FFT)
+z = zvals(:);
+p = pressure_line(:);
+
+% Estimate dominant spatial frequency from FFT
+dz = mean(diff(z));
+% Estimate dominant spatial frequency and wavelength
+P = fft(p - mean(p));
+[~, maxIdx] = max(abs(P(2:floor(end/2))));
+f_dom = maxIdx / (length(P) * dz); % cycles per mm
+L = 1 / f_dom; % wavelength in mm
+
+% Fit sine wave: A*sin(2*pi*z/L + phi) + C
+coeff = [sin(2*pi*z / L), cos(2*pi*z / L), ones(size(z))] \ p;
+A = norm(coeff(1:2)); % amplitude
+phi = atan2(coeff(2), coeff(1)); % phase
+C0 = coeff(3); % offset
+
+% Generate a smoother fit using more points
+z = linspace(min(z), max(z), 10 * length(z)); % Increase resolution
+p_fit = A * sin(2*pi*z / L + phi) + C0;
+
+% Plot fitted curve on current figure
+figure()
+hold on
+plot(z, p_fit)
+hold off
+
+% Add subtitle with wavelength
+subtitle(sprintf('Fitted wavelength = %.3f mm (Amplitude = %.3f MPa)', L, A))
 
 %% Coords relative to plot
 
@@ -131,7 +181,7 @@ relY = raster.ys - raster.home(2);
 relZ = flip(raster.zs - raster.home(3));
 
 %% Plot 3D orthogonal views - CoPilot
-figure(2)
+figure()
 hold on
 
 % XY plane
@@ -147,7 +197,7 @@ surf(X2, Y2, Z2, MPa.YZ', 'EdgeColor', 'none')
 set(gca, 'ZDir', 'reverse')
 
 cb = colorbar;
-cb.Label.String = 'RMS Pressure (MPa)';
+cb.Label.String = 'Pressure (MPa)';
 xlabel('x (mm)')
 ylabel('y (mm)')
 zlabel('z (mm)')
@@ -161,7 +211,7 @@ hold off
 rotate3d
 
 % %% Plot 3D orthogonal views - Relative to scan centre
-% figure(3)
+% figure()
 % hold on
 % 
 % % XY plane
@@ -190,11 +240,11 @@ rotate3d
 
 %% 
 %% Plot 2D XY Plane
-figure(3)
+figure()
 subplot(1, 2, 1); % Create a subplot for XY Plane
 imagesc(raster.xs, raster.ys, MPa.XY')
 cb = colorbar;
-cb.Label.String = 'RMS Pressure (MPa)';
+cb.Label.String = 'Pressure (MPa)';
 xlabel('X (mm)');
 ylabel('Y (mm)');
 title(strcat('Pressure in XY Plane at z =',{' '}, string(round(raster.zPlane, 1)), ' mm'));
@@ -204,10 +254,10 @@ axis image; % Set aspect ratio suitable for images
 subplot(1, 2, 2); % Create a subplot for YZ Plane
 imagesc(raster.ys, raster.zs, MPa.YZ') % Flip the z-axis
 cb = colorbar;
-cb.Label.String = 'RMS Pressure (MPa)';
+cb.Label.String = 'Pressure (MPa)';
 xlabel('Y (mm)');
 ylabel('Z (mm)');
-title(strcat('Pressure in YZ Plane at x =',{' '}, string(round(raster.xs(x_index), 1)), ' mm'));
+title(strcat('Pressure in YZ Plane at x =',{' '}, string(x), ' mm'));
 axis xy; % Correct the axis direction
 axis image; % Set aspect ratio suitable for images
 set(gca, 'YDir', 'reverse'); % Reverse the z-axis
