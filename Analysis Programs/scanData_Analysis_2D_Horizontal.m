@@ -5,8 +5,8 @@ clear all
 analysisVersion = 4;
 
 %% Load Data
-folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\';
-file_name = 'Mario_5';
+folder_path = '/Users/gv19838/Library/CloudStorage/OneDrive-UniversityofBristol/PhD/Hydrophone/UNDT-Hydrophone/DataOut/';
+file_name = 'Near_Source_2';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')

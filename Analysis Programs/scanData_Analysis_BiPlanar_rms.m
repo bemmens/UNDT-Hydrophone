@@ -6,7 +6,7 @@ analysisVersion = 3;
 
 %% Load Data
 folder_path = '/Users/gv19838/Library/CloudStorage/OneDrive-UniversityofBristol/PhD/Hydrophone/UNDT-Hydrophone/DataOut/';
-file_name = 'PSV_3MHz_0mm_4';
+file_name = 'DIY_Acrylic_5';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -72,10 +72,60 @@ Vrms.YZ = mean(squeeze(rms(scanData_noBias.YZ,3)),3); % rms voltage at [x,y,z0]
 % Vrms.YZ = squeeze(rms(scanData_bpf.YZ,3)); % rms voltage at [x,y,z0]
 % Vrms.XZ = squeeze(rms(scanData_bpf.XZ,3)); % rms voltage at [x,y,z0]
 
+
+
 %% To MPa
 mVperMPa = 151.91; % CHECK
 MPa.XY = Vrms.XY*1e3/mVperMPa; 
 MPa.YZ = Vrms.YZ*1e3/mVperMPa; 
+
+%% Calculate Phase at 1MHz
+
+% Target frequency
+targetFreq = 1e6; % 1 MHz
+
+% Get dimensions
+[nX, nY, nSamples, nRepeats_XY] = size(scanData_noBias.XY);
+[nY_yz, nZ, ~, nRepeats_YZ] = size(scanData_noBias.YZ);
+
+% Frequency vector for FFT
+freq = scpSettings.SampleFrequency * (0:floor(nSamples/2)) / nSamples;
+
+% Find index closest to target frequency
+[~, freqIdx] = min(abs(freq - targetFreq));
+disp(['Calculating phase at nearest FFT bin: ', num2str(freq(freqIdx)/1e6), ' MHz']);
+
+% Initialize phase matrices
+Phase.XY = zeros(nX, nY);
+Phase.YZ = zeros(nY_yz, nZ);
+
+% Calculate phase for XY plane
+for xi = 1:nX
+    for yi = 1:nY
+        % Average waveform across repeats
+        waveform_avg = mean(squeeze(scanData_noBias.XY(xi, yi, :, :)), 2);
+        % Compute FFT
+        fft_result = fft(waveform_avg);
+        % Extract phase at target frequency and convert to degrees
+        % Phase.XY(xi, yi) = rad2deg(angle(fft_result(freqIdx)));
+        Phase.XY(xi, yi) = abs(fft_result(freqIdx));
+
+    end
+end
+
+% Calculate phase for YZ plane
+for yi = 1:nY_yz
+    for zi = 1:nZ
+        % Average waveform across repeats
+        waveform_avg = mean(squeeze(scanData_noBias.YZ(yi, zi, :, :)), 2);
+        % Compute FFT
+        fft_result = fft(waveform_avg);
+        % Extract phase at target frequency and convert to degrees
+        % Phase.YZ(yi, zi) = rad2deg(angle(fft_result(freqIdx)));
+        Phase.YZ(yi, zi) = abs(fft_result(freqIdx));
+
+    end
+end
 
 %% Check Waveform 
 
@@ -208,6 +258,29 @@ cb.Label.String = 'RMS Pressure (MPa)';
 xlabel('Y (mm)');
 ylabel('Z (mm)');
 title(strcat('Pressure in YZ Plane at x =',{' '}, string(round(raster.xs(x_index), 1)), ' mm'));
+axis xy; % Correct the axis direction
+axis image; % Set aspect ratio suitable for images
+set(gca, 'YDir', 'reverse'); % Reverse the z-axis
+
+%% Plot 2D Phase at 1MHz
+figure(4)
+subplot(1, 2, 1); % Create a subplot for XY Plane
+imagesc(raster.xs, raster.ys, Phase.XY')
+cb = colorbar;
+% cb.Label.String = 'Phase (degrees)';
+xlabel('X (mm)');
+ylabel('Y (mm)');
+title(strcat('Phase at 1MHz in XY Plane at z =',{' '}, string(round(raster.zPlane, 1)), ' mm'));
+axis xy; % Correct the axis direction
+axis image; % Set aspect ratio suitable for images
+
+subplot(1, 2, 2); % Create a subplot for YZ Plane
+imagesc(raster.ys, raster.zs, Phase.YZ')
+cb = colorbar;
+% cb.Label.String = 'Phase (degrees)';
+xlabel('Y (mm)');
+ylabel('Z (mm)');
+title(strcat('Phase at 1MHz in YZ Plane at x =',{' '}, string(round(raster.xs(x_index), 1)), ' mm'));
 axis xy; % Correct the axis direction
 axis image; % Set aspect ratio suitable for images
 set(gca, 'YDir', 'reverse'); % Reverse the z-axis
