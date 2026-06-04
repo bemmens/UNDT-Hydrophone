@@ -1,5 +1,6 @@
 function plotProgressBiPlanar(mVperMPa, scpSettings, scanData, xyz_switch, raster, i,j)
 
+disp('plotting')
 % scanData.ab [Na,Nb,Nsamples,Nchannels,nRepeats]
 scanData_noTrigger.XY = squeeze(scanData.XY(:,:,:,1,:));
 scanData_noTrigger.YZ = squeeze(scanData.YZ(:,:,:,1,:));
@@ -71,5 +72,8 @@ zlabel('z (mm)')
 title('Bi-Planar Scan of Acoustic Field')
 subtitle('Stage Coordinates')
 hold off
+
+disp('Plot Complete')
+
 
 

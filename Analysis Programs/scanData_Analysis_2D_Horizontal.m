@@ -6,7 +6,7 @@ analysisVersion = 4;
 
 %% Load Data
 folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\';
-file_name = 'Mario_5';
+file_name = 'Near_Source_11';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -27,8 +27,11 @@ t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
 pkrange = [1,100]; % us - time range to look for peak 
 pkrangeidx = pkrange*scpSettings.SampleFrequency/1e6; % corresponding array index
 
+disp(size(scanData.XY))
+
 % remove trigger (2nd) channel
 scanData_noTrigger.XY = squeeze(scanData.XY(:,:,:,1,:));
+disp(size(scanData_noTrigger.XY))
 
 % remove bias
 scanData_noBias.XY = scanData_noTrigger.XY - mean(scanData_noTrigger.XY,3);
@@ -63,6 +66,7 @@ y_index = 10;
 % %xlim([100,150])
 %% With nRpeats
 Vrms.XY = mean(squeeze(rms(scanData_noBias.XY,3)),3); % rms voltage at [x,y,z0]
+disp(size(Vrms.XY))
 
 %% To MPa
 mVperMPa = 232.40; % CHECK
@@ -70,27 +74,37 @@ MPa.XY = Vrms.XY*1e3/mVperMPa;
 
 %% Check Waveform 
 
-wvfmData_raw1 = squeeze(scanData_noBias.XY(x_index,y_index,:,1))*1e3/mVperMPa;
+wvfmData_raw1 = squeeze(scanData_noBias.XY(x_index,y_index,:,1));
+wvfmData_raw2 = squeeze(scanData_noBias.XY(x_index,y_index,:,2));
+wvfmData_raw3 = squeeze(scanData_noBias.XY(x_index,y_index,:,3));
+
+
+wvfm_mean = squeeze(mean(scanData_noBias.XY(x_index,y_index,:,:),4));
+disp(size(wvfmData_raw1))
+disp(size(wvfm_mean))
+
 
 %% Plots
 figure(1)
 plot(t,wvfmData_raw1)
 hold on
-%plot(t,wvfmData_raw2)
-%plot(t,wvfmData_raw3)
+
+plot(t,wvfmData_raw2)
+plot(t,wvfmData_raw3)
+plot(t,wvfm_mean)
 %xlim([0,200])
 x = raster.xs(x_index);
 y = raster.ys(y_index);
 % title(strcat('Raw Data at [x,y,z] = [',string(x),', ',string(y)] mm'))
 xlabel('Time [us]');
-ylabel('Amplitude [MPa]');
+% ylabel('Amplitude [MPa]');
 hold off
 %legend('Raw Waveform','Mean waveform','pkrange min','pkrange max','Vrms')
 % xlim([0,10])
 
 %% Bandpass filter 
 Fs = scpSettings.SampleFrequency; % Sampling Frequency
-F0 = 4.5*1e6; % Centre
+F0 = 1*1e6; % Centre
 width = 0.3*1e6;
 Fpass1 = F0-width; % First Passband Frequency
 Fpass2 = F0+width; % Second Passband Frequency

@@ -6,7 +6,7 @@ analysisVersion = 3;
 
 %% Load Data
 folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\';
-file_name = 'PSV_3MHz_1mm_5';
+file_name = 'DIY_Acrylic_Day4_3';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -17,7 +17,6 @@ elseif analysisVersion ~= scpSettings.scanVersion
     warning("Scan and analysis programs have mismatched versions.")
 end
 
-
 %%
 % Useful Constants
 t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
@@ -27,20 +26,16 @@ t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
 pkrange = [1,100]; % us - time range to look for peak 
 pkrangeidx = pkrange*scpSettings.SampleFrequency/1e6; % corresponding array index
 
-% remove trigger (2nd) channel
-scanData_noTrigger.XY = squeeze(scanData.XY(:,:,:,1,:));
-scanData_noTrigger.YZ = squeeze(scanData.YZ(:,:,:,1,:));
-
 % remove bias
-scanData_noBias.XY = scanData_noTrigger.XY - mean(scanData_noTrigger.XY,3);
-scanData_noBias.YZ = scanData_noTrigger.YZ - mean(scanData_noTrigger.YZ,3);
+scanData_noBias.XY = scanData.XY - mean(scanData.XY,3);
+scanData_noBias.YZ = scanData.YZ - mean(scanData.YZ,3);
 
 disp(size(scanData_noBias.YZ))
 
 % %% Bandpass filter 
 % 
-x_index = 7;
-y_index = 15;
+x_index = 10;
+y_index = 10;
 z_index = 10;
 
 
@@ -79,7 +74,7 @@ MPa.YZ = Vrms.YZ*1e3/mVperMPa;
 
 %% Check Waveform 
 
-wvfmData_raw1 = squeeze(scanData_noBias.XY(x_index,y_index,:,1))*1e3/mVperMPa;
+wvfmData_raw1 = squeeze(scanData_noBias.XY(x_index,y_index,:))*1e3/mVperMPa;
 
 %% Plots
 figure(1)
