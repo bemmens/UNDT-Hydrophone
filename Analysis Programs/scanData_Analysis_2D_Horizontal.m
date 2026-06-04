@@ -6,7 +6,7 @@ analysisVersion = 4;
 
 %% Load Data
 folder_path = '/Users/gv19838/Library/CloudStorage/OneDrive-UniversityofBristol/PhD/Hydrophone/UNDT-Hydrophone/DataOut/';
-file_name = 'Near_Source_2';
+file_name = 'DIY_Acrylic_Day4_5';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -16,7 +16,6 @@ if analysisVersion == 0
 elseif analysisVersion ~= scpSettings.scanVersion
     warning("Scan and analysis programs have mismatched versions.")
 end
-
 
 %%
 % Useful Constants
@@ -71,6 +70,8 @@ MPa.XY = Vrms.XY*1e3/mVperMPa;
 %% Check Waveform 
 
 wvfmData_raw1 = squeeze(scanData_noBias.XY(x_index,y_index,:,1))*1e3/mVperMPa;
+wvfmData_mean = squeeze(mean(scanData_noBias.XY(x_index,y_index,:,:),4))*1e3/mVperMPa;
+disp(size(wvfmData_mean))
 
 %% Plots
 figure(1)
@@ -78,6 +79,8 @@ plot(t,wvfmData_raw1)
 hold on
 %plot(t,wvfmData_raw2)
 %plot(t,wvfmData_raw3)
+plot(t,wvfmData_mean)
+
 %xlim([0,200])
 x = raster.xs(x_index);
 y = raster.ys(y_index);
@@ -85,7 +88,7 @@ y = raster.ys(y_index);
 xlabel('Time [us]');
 ylabel('Amplitude [MPa]');
 hold off
-%legend('Raw Waveform','Mean waveform','pkrange min','pkrange max','Vrms')
+legend('Raw Waveform','Mean waveform')
 % xlim([0,10])
 
 %% Bandpass filter 

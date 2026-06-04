@@ -6,7 +6,7 @@ analysisVersion = 3;
 
 %% Load Data
 folder_path = '/Users/gv19838/Library/CloudStorage/OneDrive-UniversityofBristol/PhD/Hydrophone/UNDT-Hydrophone/DataOut/';
-file_name = 'DIY_Acrylic_5';
+file_name = 'DIY_Acrylic_Day4_5';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -82,7 +82,7 @@ MPa.YZ = Vrms.YZ*1e3/mVperMPa;
 %% Calculate Phase at 1MHz
 
 % Target frequency
-targetFreq = 1e6; % 1 MHz
+targetFreq = 1.06e6; % 1 MHz
 
 % Get dimensions
 [nX, nY, nSamples, nRepeats_XY] = size(scanData_noBias.XY);
@@ -107,8 +107,7 @@ for xi = 1:nX
         % Compute FFT
         fft_result = fft(waveform_avg);
         % Extract phase at target frequency and convert to degrees
-        % Phase.XY(xi, yi) = rad2deg(angle(fft_result(freqIdx)));
-        Phase.XY(xi, yi) = abs(fft_result(freqIdx));
+        Phase.XY(xi, yi) = rad2deg(angle(fft_result(freqIdx)));
 
     end
 end
@@ -121,8 +120,7 @@ for yi = 1:nY_yz
         % Compute FFT
         fft_result = fft(waveform_avg);
         % Extract phase at target frequency and convert to degrees
-        % Phase.YZ(yi, zi) = rad2deg(angle(fft_result(freqIdx)));
-        Phase.YZ(yi, zi) = abs(fft_result(freqIdx));
+        Phase.YZ(yi, zi) = rad2deg(angle(fft_result(freqIdx)));
 
     end
 end
@@ -130,6 +128,7 @@ end
 %% Check Waveform 
 
 wvfmData_raw1 = squeeze(scanData_noBias.XY(x_index,y_index,:,1))*1e3/mVperMPa;
+
 
 % Find maximum voltage across both XY and YZ datasets
 [maxValueXY, maxIndexXY] = max(abs(scanData_noBias.XY(:)));
@@ -173,6 +172,47 @@ title(['Maximum Amplitude Waveform at [', max_location, '] mm'])
 xlabel('Time [us]');
 ylabel('Amplitude [MPa]');
 hold off
+
+% FFT of the check waveform
+N = length(wvfmData_raw1);
+Y = fft(wvfmData_raw1);
+P2 = abs(Y / N);
+P1 = P2(1:floor(N/2)+1);
+if N > 1
+    P1(2:end-1) = 2 * P1(2:end-1);
+end
+f = scpSettings.SampleFrequency * (0:floor(N/2)) / N / 1e6; % MHz
+figure(5)
+plot(f, P1)
+xlim([0, max(f)])
+xlabel('Frequency (MHz)');
+ylabel('Amplitude (MPa)');
+title(['FFT of Check Waveform at x=', num2str(raster.xs(x_index)), ' mm, y=', num2str(raster.ys(y_index)), ' mm']);
+grid on
+
+% Extract the 1 MHz Fourier component from the check waveform
+freqRaw = scpSettings.SampleFrequency * (0:floor(N/2)) / N;
+[~, idx1MHz] = min(abs(freqRaw - targetFreq));
+component1MHz = Y(idx1MHz);
+phase1MHz = angle(component1MHz);
+amplitude1MHz = 2 * abs(component1MHz) / N;
+reconstruct1MHz = amplitude1MHz * cos(2*pi*targetFreq*(t*1e-6) + phase1MHz);
+
+disp(['1 MHz component amplitude: ', num2str(amplitude1MHz), ' MPa, phase: ', num2str(rad2deg(phase1MHz)), ' degrees']);
+
+figure(6)
+wvfmData_raw1_norm = wvfmData_raw1 / max(abs(wvfmData_raw1));
+reconstruct1MHz_norm = reconstruct1MHz *0.8/ max(abs(reconstruct1MHz));
+plot(t, wvfmData_raw1_norm, 'b')
+hold on
+plot(t, reconstruct1MHz_norm, 'r')
+hold off
+xlabel('Time [us]');
+ylabel('Normalized amplitude');
+legend('Check waveform', '1 MHz component');
+title(['Check waveform and extracted 1 MHz component at x=', num2str(raster.xs(x_index)), ' mm, y=', num2str(raster.ys(y_index)), ' mm']);
+grid on
+
 
 %% Coords relative to plot
 
