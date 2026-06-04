@@ -6,7 +6,7 @@ analysisVersion = 3;
 
 %% Load Data
 folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\';
-file_name = 'DIY_Acrylic_Day4_3';
+file_name = 'DIY_Acrylic_Day4_4';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')

@@ -23,9 +23,10 @@ pkrangeidx = pkrange*scpSettings.SampleFrequency/1e6; % corresponding array inde
 
 % remove bias
 scanData_noBias = scanData(:,:,:,:,1) - mean(scanData(:,:,:,:,1),4);
-Vpk = squeeze(max(scanData_noBias(:,:,:,pkrangeidx(1):pkrangeidx(2),1),[],4)); % max voltage at [x,y,z]
+% Vpk = squeeze(max(scanData_noBias(:,:,:,pkrangeidx(1):pkrangeidx(2),1),[],4)); % max voltage at [x,y,z]
+Vrms = squeeze(rms(scanData_noBias(:,:,:,:,1),4)); % max voltage at [x,y,z]
 
-pks = find(scanData_noBias(x_index,y_index,z_index,:,1) == Vpk(x_index,y_index,z_index));
+% pks = find(scanData_noBias(x_index,y_index,z_index,:,1) == Vpk(x_index,y_index,z_index));
 
 wvfmData = squeeze(scanData_noBias(x_index,y_index,z_index,:,1));
 
@@ -43,16 +44,17 @@ xlabel('Time [us]');
 ylabel('Amplitude [V]');
 hold off
 xline(pkrange)
-xline(t(pks),'--r')
+% xline(t(pks),'--r')
 
 %% To MPa
 mVperMPa = 151.91; % CHECK
-MPa = Vpk*1e3/mVperMPa; 
+MPa = Vrms*1e3/mVperMPa; 
 figure(10)
 imagesc(raster.xs, flip(raster.ys), rot90(MPa(:,:,z_index)))
 axis image;
 set(gca, 'YDir', 'normal')
-a = colorbar;
+a = colorbar();
+clim([min(MPa,[],'all'),max(MPa,[],'all')])
 a.Label.String = 'MPa';
 xlabel('x (mm)')
 ylabel('y (mm)')
@@ -61,10 +63,24 @@ title(strcat('z= ', string(raster.zs(z_index)), 'mm'))
 % Add Slider
 nZs = length(raster.zs);
 slider = uicontrol('Style', 'slider', 'Min', 1, 'Max', nZs, 'Value', z_index, 'Position', [20 20 200 20]);
-addlistener(slider, 'Value', 'PostSet', @(~,~) updatePlot(MPa,round(slider.Value), raster));
+addlistener(slider, 'Value', 'PostSet', @(~,~) updatePlot(MPa,round(slider.Value), raster));4
+
+%% Plot 2D XZ Plane
+shape = size(scanData);
+yIDX_mid = round(shape(2)/2);
+figure(4)
+imagesc(raster.xs, raster.zs, squeeze(MPa(:,yIDX_mid,:))')
+cb = colorbar;
+cb.Label.String = 'Pressure (MPa)';
+xlabel('X (mm)');
+ylabel('Z (mm)');
+title(strcat('Pressure in XZ Plane at x =',{' '}, string(round(raster.home(2), 1)), ' mm'));
+axis xy; % Correct the axis direction
+axis image; % Set aspect ratio suitable for images
+
 
 %%
-figure(4)
+figure(5)
 isosurface(MPa,0);
 hold on
 isosurface(MPa,0.5)
@@ -76,7 +92,7 @@ legend('0MPa','0.5MPa','0.75MPa')
 isosurface(smooth3(MPa,"box",3))
 
 %% Scatter
-scatter3()
+% scatter3()
 
 %% functions
 
@@ -87,6 +103,7 @@ function updatePlot(MPa,z_index, raster)
     axis image;
     set(gca, 'YDir', 'normal')
     a = colorbar;
+    clim([min(MPa,[],'all'),max(MPa,[],'all')])
     a.Label.String = 'MPa';
     xlabel('x (mm)')
     ylabel('y (mm)')

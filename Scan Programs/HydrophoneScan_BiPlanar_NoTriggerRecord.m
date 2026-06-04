@@ -82,7 +82,7 @@ if exist('scp', 'var')
     
     % Trigger settings
     % Set trigger timeout: 
-    scp.TriggerTimeOut = 0; % s -> Long delay to indicate trigger not found
+    scp.TriggerTimeOut = 5; % s -> Long delay to indicate trigger not found
     
     % Disable all channel trigger sources:
     for ch = scp.Channels

@@ -62,7 +62,7 @@ if exist('scp', 'var')
     scp.MeasureMode = 2; % Block Mode
 
     % Set sample frequency:
-    MHz = 10;     % CHECK
+    MHz = 50;     % CHECK
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:

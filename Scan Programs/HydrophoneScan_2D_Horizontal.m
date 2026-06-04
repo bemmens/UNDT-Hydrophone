@@ -8,7 +8,7 @@ fclose all;
 
 %% Check Savefile
 File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'Near_Source_11'; % CHECK
+File_name = 'DIY_Acrylic_Day4_5'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 if isfile(Save_String)
@@ -62,7 +62,7 @@ if exist('scp', 'var')
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    record_time = 40/1e6; % seconds                % CHECK
+    record_time = 500/1e6; % seconds                % CHECK
     scp.RecordLength = scp.SampleFrequency*record_time; % n Samples: max = 33553920 ~ 3e7 (67107840?)    
 
     % Set pre sample ratio:
@@ -102,7 +102,7 @@ if exist('scp', 'var')
     clear chTr;
     
     % Set range on each channel (V)
-    scp.Channels(1).Range = 0.1 ;     % CHECK
+    scp.Channels(1).Range = 0.5 ;     % CHECK
     scp.Channels(2).Range = 5 ;     % CHECK
     
     else
@@ -112,7 +112,7 @@ end
 % Save aprameters for analysis
 scpSettings.RecordLength = scp.RecordLength;
 scpSettings.SampleFrequency = scp.SampleFrequency;
-scpSettings.nRepeats = 200;           % CHECK
+scpSettings.nRepeats = 1;           % CHECK
 scpSettings.timestamp = datetime;
 scpSettings.scanVersion = 4; % CHECK
 scpSettings.sensorID = 'TFS-5649-8'; %CHECK
@@ -165,9 +165,9 @@ c_water = 1450; % speed of sound m/s
 Hz = 1e6; % CHECK
 wavelength = c_water*1e3/Hz; % in mm
 
-raster.home = [28.35   22.66   39.61]; % home position [x,y,z] in mm     % CHECK
-raster.size = [33 33 0]; % [X,Y] in mm                      % CHECK
-raster.step = [1/1,1/1,1]*wavelength; % [dx,dy] mm - must be greater than zero          % CHECK
+raster.home = [28.1   22.1   15.9]; % home position [x,y,z] in mm     % CHECK
+raster.size = [10 10 0]; % [X,Y] in mm                      % CHECK
+raster.step = [1/8,1/8,1,1]*wavelength; % [dx,dy] mm - must be greater than zero          % CHECK
 
 raster.pause_time = 20/1000; % s - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
