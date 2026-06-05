@@ -8,7 +8,7 @@ fclose all;
 
 %% Check Savefile
 File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'DIY_Acrylic_Day4_4_PDMountRemoved_2'; % CHECK
+File_name = 'DIYMk2_Day1_7'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 if isfile(Save_String)
@@ -184,16 +184,16 @@ wavelength = c_water*1e3/Hz; % in mm
 % raster.home = [xhome,yhome,zhome]; % home position [x,y,z] in mm     % CHECK
 % raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-surface = 12.27;
-raster.size = [10 10 3]; % [X,Y,Z] in mm                      % CHECK
+surface = 10.94;
+raster.size = [10 10 10]; % [X,Y,Z] in mm                      % CHECK
 raster.home = [28.1   22.1   surface+raster.size(3)/2]; % home position [x,y,z] in mm     % CHECK
 % raster.step = [1/16,1/16,1/32]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
 raster.step = [1/8,1/8,1/32]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
-% raster.step = [1/4,1/4,1/8]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
+% raster.step = [1/2,1/2,1/8]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
 
 
 % raster.zPlane = raster.home(3); % the position of the xy plane in the z axis
-raster.zPlane = 14.1; % the position of the xy plane in the z axis
+raster.zPlane = 13.29; % the position of the xy plane in the z axis
 
 raster.pause_time = 20/1000; % s - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
