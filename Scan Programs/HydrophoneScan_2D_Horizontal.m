@@ -8,7 +8,7 @@ fclose all;
 
 %% Check Savefile
 File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'DIY_Acrylic_Day4_5'; % CHECK
+File_name = 'DIY_Acrylic_Day4_4_PDRemoved_HD_2D'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 if isfile(Save_String)
@@ -165,7 +165,7 @@ c_water = 1450; % speed of sound m/s
 Hz = 1e6; % CHECK
 wavelength = c_water*1e3/Hz; % in mm
 
-raster.home = [28.1   22.1   15.9]; % home position [x,y,z] in mm     % CHECK
+raster.home = [28.1   22.1   13.1]; % home position [x,y,z] in mm     % CHECK
 raster.size = [10 10 0]; % [X,Y] in mm                      % CHECK
 raster.step = [1/8,1/8,1,1]*wavelength; % [dx,dy] mm - must be greater than zero          % CHECK
 

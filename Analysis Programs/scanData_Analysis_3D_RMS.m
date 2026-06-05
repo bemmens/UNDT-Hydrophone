@@ -4,7 +4,7 @@ clear all
 
 %% Load Data
 folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\';
-file_name = 'DIY_Acrylic_Day4_6';
+file_name = 'DIY_Acrylic_Day4_7';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -63,7 +63,7 @@ title(strcat('z= ', string(raster.zs(z_index)), 'mm'))
 % Add Slider
 nZs = length(raster.zs);
 slider = uicontrol('Style', 'slider', 'Min', 1, 'Max', nZs, 'Value', z_index, 'Position', [20 20 200 20]);
-addlistener(slider, 'Value', 'PostSet', @(~,~) updatePlot(MPa,round(slider.Value), raster));4
+addlistener(slider, 'Value', 'PostSet', @(~,~) updatePlot(MPa,round(slider.Value), raster));
 
 %% Plot 2D XZ Plane
 shape = size(scanData);
