@@ -5,8 +5,8 @@ clear all
 analysisVersion = 3;
 
 %% Load Data
-folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\';
-file_name = 'PSV_3MHz_1mm_5';
+folder_path = '/Users/gv19838/Library/CloudStorage/OneDrive-UniversityofBristol/PhD/Hydrophone/UNDT-Hydrophone/DataOut/';
+file_name = 'DIYMk1_Char2';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -35,100 +35,27 @@ scanData_noTrigger.YZ = squeeze(scanData.YZ(:,:,:,1,:));
 scanData_noBias.XY = scanData_noTrigger.XY - mean(scanData_noTrigger.XY,3);
 scanData_noBias.YZ = scanData_noTrigger.YZ - mean(scanData_noTrigger.YZ,3);
 
-disp(size(scanData_noBias.YZ))
+disp(size(scanData_noBias.XY))
 
 % %% Bandpass filter 
 % 
-x_index = 7;
-y_index = 15;
-z_index = 10;
+x_index = 20;
+y_index = 40;
+z_index = 5;
 
 
-% Fs = scpSettings.SampleFrequency; % Sampling Frequency
-% F0 = 1*1e6; % Centre
-% width = 0.25*1e6;
-% Fpass1 = 5e5; % First Passband Frequency
-% Fpass2 = F0+width; % Second Passband Frequency
-% 
-% % Apply the bandpass filter
-% figure(1)
-% bandpass(squeeze(scanData_noBias.XY(x_index,y_index,:))', [Fpass1 Fpass2], Fs)
-% [~,bpfilter] = bandpass(squeeze(scanData_noBias.XY(x_index,y_index,:))', [Fpass1 Fpass2], Fs);
-% 
-% scanData_bpf.XY = filter( bpfilter.Coefficients, 1, scanData_noBias.XY, [], 3);
-% scanData_bpf.YZ = filter( bpfilter.Coefficients, 1, scanData_noBias.YZ, [], 3);
-% 
-% figure(100)
-% plot(t,squeeze(scanData_bpf.XY(x_index,y_index,:,1)))
-% hold on
-% %plot(t,squeeze(scanData_noBias.XY(10,10,:)))
-% hold off
-% %xlim([100,150])
 %% With nRpeats
 Vrms.XY = mean(squeeze(rms(scanData_noBias.XY,3)),3); % rms voltage at [x,y,z0]
 Vrms.YZ = mean(squeeze(rms(scanData_noBias.YZ,3)),3); % rms voltage at [x,y,z0]
 
-% Vrms.XY = squeeze(rms(scanData_bpf.XY,3)); % rms voltage at [x,y,z0]
-% Vrms.YZ = squeeze(rms(scanData_bpf.YZ,3)); % rms voltage at [x,y,z0]
-% Vrms.XZ = squeeze(rms(scanData_bpf.XZ,3)); % rms voltage at [x,y,z0]
-
-
-
 %% To MPa
-mVperMPa = 151.91; % CHECK
+mVperMPa = 170.49; % CHECK
 MPa.XY = Vrms.XY*1e3/mVperMPa; 
 MPa.YZ = Vrms.YZ*1e3/mVperMPa; 
-
-%% Calculate Phase at 1MHz
-
-% Target frequency
-targetFreq = 1.06e6; % 1 MHz
-
-% Get dimensions
-[nX, nY, nSamples, nRepeats_XY] = size(scanData_noBias.XY);
-[nY_yz, nZ, ~, nRepeats_YZ] = size(scanData_noBias.YZ);
-
-% Frequency vector for FFT
-freq = scpSettings.SampleFrequency * (0:floor(nSamples/2)) / nSamples;
-
-% Find index closest to target frequency
-[~, freqIdx] = min(abs(freq - targetFreq));
-disp(['Calculating phase at nearest FFT bin: ', num2str(freq(freqIdx)/1e6), ' MHz']);
-
-% Initialize phase matrices
-Phase.XY = zeros(nX, nY);
-Phase.YZ = zeros(nY_yz, nZ);
-
-% Calculate phase for XY plane
-for xi = 1:nX
-    for yi = 1:nY
-        % Average waveform across repeats
-        waveform_avg = mean(squeeze(scanData_noBias.XY(xi, yi, :, :)), 2);
-        % Compute FFT
-        fft_result = fft(waveform_avg);
-        % Extract phase at target frequency and convert to degrees
-        Phase.XY(xi, yi) = rad2deg(angle(fft_result(freqIdx)));
-
-    end
-end
-
-% Calculate phase for YZ plane
-for yi = 1:nY_yz
-    for zi = 1:nZ
-        % Average waveform across repeats
-        waveform_avg = mean(squeeze(scanData_noBias.YZ(yi, zi, :, :)), 2);
-        % Compute FFT
-        fft_result = fft(waveform_avg);
-        % Extract phase at target frequency and convert to degrees
-        Phase.YZ(yi, zi) = rad2deg(angle(fft_result(freqIdx)));
-
-    end
-end
 
 %% Check Waveform 
 
 wvfmData_raw1 = squeeze(scanData_noBias.XY(x_index,y_index,:,1))*1e3/mVperMPa;
-
 
 % Find maximum voltage across both XY and YZ datasets
 [maxValueXY, maxIndexXY] = max(abs(scanData_noBias.XY(:)));
@@ -159,60 +86,93 @@ else
     wvfmData_max = squeeze(scanData_noBias.YZ(max_y_idx, max_z_idx, :, max_repeat))*1e3/mVperMPa;
 end
 %% Plots
-figure(1)
+
+figure()
 plot(t, wvfmData_max)
 hold on
 % Get location information
 if maxValueXY >= maxValueYZ
+    x = raster.xs(max_x_idx);
+    y = raster.ys(max_y_idx);
     max_location = ['x=', num2str(raster.xs(max_x_idx)), ', y=', num2str(raster.ys(max_y_idx)), ', z=', num2str(raster.zPlane)];
 else
+    y = raster.ys(max_y_idx);
+    z = raster.zs(max_z_idx);
     max_location = ['x=', num2str(raster.home(1)), ', y=', num2str(raster.ys(max_y_idx)), ', z=', num2str(raster.zs(max_z_idx))];
 end
+% Plot horizontal line at RMS of the pressure line
+yline(rms(wvfmData_max(pkrangeidx(1):pkrangeidx(2))));
+% Add horizontal lines for the RMS of a sine wave with the same amplitude as the peak
+Amp = max(wvfmData_max);
+sine_rms = Amp / sqrt(2); % RMS of a sine wave with amplitude A
+yline(sine_rms,'--');
+legend('Waveform', 'RMS', 'Location', 'best');
+% Calculate RMS and max values for the waveform
+wvfm_rms = rms(wvfmData_max(pkrangeidx(1):pkrangeidx(2)));
+wvfm_max = max(abs(wvfmData_max));
+% Add RMS and max values to the subtitle
+subtitle(sprintf('RMS = %.3f MPa, Max = %.3f MPa', wvfm_rms, wvfm_max));
 title(['Maximum Amplitude Waveform at [', max_location, '] mm'])
 xlabel('Time [us]');
 ylabel('Amplitude [MPa]');
+legend('Waveform', 'RMS', 'RMS of Sine', 'Location', 'Best');
 hold off
 
-% FFT of the check waveform
-N = length(wvfmData_raw1);
-Y = fft(wvfmData_raw1);
-P2 = abs(Y / N);
-P1 = P2(1:floor(N/2)+1);
-if N > 1
-    P1(2:end-1) = 2 * P1(2:end-1);
-end
-f = scpSettings.SampleFrequency * (0:floor(N/2)) / N / 1e6; % MHz
-figure(5)
-plot(f, P1)
-xlim([0, max(f)])
-xlabel('Frequency (MHz)');
-ylabel('Amplitude (MPa)');
-title(['FFT of Check Waveform at x=', num2str(raster.xs(x_index)), ' mm, y=', num2str(raster.ys(y_index)), ' mm']);
-grid on
+%%
 
-% Extract the 1 MHz Fourier component from the check waveform
-freqRaw = scpSettings.SampleFrequency * (0:floor(N/2)) / N;
-[~, idx1MHz] = min(abs(freqRaw - targetFreq));
-component1MHz = Y(idx1MHz);
-phase1MHz = angle(component1MHz);
-amplitude1MHz = 2 * abs(component1MHz) / N;
-reconstruct1MHz = amplitude1MHz * cos(2*pi*targetFreq*(t*1e-6) + phase1MHz);
+% Plot pressure along the YZ line that contains the overall maximum
+% Determine y index of overall maximum if not already available
 
-disp(['1 MHz component amplitude: ', num2str(amplitude1MHz), ' MPa, phase: ', num2str(rad2deg(phase1MHz)), ' degrees']);
+[maxValueYZ, maxIndexYZ] = max(abs(scanData_noBias.YZ(:)));
+[max_y_idx, ~, ~, ~] = ind2sub(size(scanData_noBias.YZ), maxIndexYZ);
 
-figure(6)
-wvfmData_raw1_norm = wvfmData_raw1 / max(abs(wvfmData_raw1));
-reconstruct1MHz_norm = reconstruct1MHz *0.8/ max(abs(reconstruct1MHz));
-plot(t, wvfmData_raw1_norm, 'b')
+y_line_idx = max_y_idx;
+pressure_line = MPa.YZ(y_line_idx, :);   % MPa.YZ rows = y, cols = z
+zvals = raster.zs;
+
+figure()
+plot(zvals, pressure_line)
 hold on
-plot(t, reconstruct1MHz_norm, 'r')
-hold off
-xlabel('Time [us]');
-ylabel('Normalized amplitude');
-legend('Check waveform', '1 MHz component');
-title(['Check waveform and extracted 1 MHz component at x=', num2str(raster.xs(x_index)), ' mm, y=', num2str(raster.ys(y_index)), ' mm']);
-grid on
+[~, zmax_idx] = max(abs(pressure_line));
+plot(zvals(zmax_idx), pressure_line(zmax_idx), 'r*', 'MarkerSize',10)
 
+hold off
+grid on
+xlabel('Z (mm)')
+ylabel('RMS Pressure (MPa)')
+title(sprintf('Pressure vs Z at y = %.2f mm (index %d)', raster.ys(y_line_idx), y_line_idx))
+legend('Pressure', 'Max (abs)', 'Location', 'Best')
+
+% Fit a sine to the pressure_line vs zvals using dominant spatial frequency (FFT)
+z = zvals(:);
+p = pressure_line(:);
+
+% Estimate dominant spatial frequency from FFT
+dz = mean(diff(z));
+% Estimate dominant spatial frequency and wavelength
+P = fft(p - mean(p));
+[~, maxIdx] = max(abs(P(2:floor(end/2))));
+f_dom = maxIdx / (length(P) * dz); % cycles per mm
+L = 1 / f_dom; % wavelength in mm
+
+% Fit sine wave: A*sin(2*pi*z/L + phi) + C
+coeff = [sin(2*pi*z / L), cos(2*pi*z / L), ones(size(z))] \ p;
+A = norm(coeff(1:2)); % amplitude
+phi = atan2(coeff(2), coeff(1)); % phase
+C0 = coeff(3); % offset
+
+% Generate a smoother fit using more points
+z = linspace(min(z), max(z), 10 * length(z)); % Increase resolution
+p_fit = A * sin(2*pi*z / L + phi) + C0;
+
+% Plot fitted curve on current figure
+figure()
+hold on
+plot(z, p_fit)
+hold off
+
+% Add subtitle with wavelength
+subtitle(sprintf('Fitted wavelength = %.3f mm (Amplitude = %.3f MPa)', L, A))
 
 %% Coords relative to plot
 
@@ -221,7 +181,7 @@ relY = raster.ys - raster.home(2);
 relZ = flip(raster.zs - raster.home(3));
 
 %% Plot 3D orthogonal views - CoPilot
-figure(2)
+figure()
 hold on
 
 % XY plane
@@ -237,7 +197,7 @@ surf(X2, Y2, Z2, MPa.YZ', 'EdgeColor', 'none')
 set(gca, 'ZDir', 'reverse')
 
 cb = colorbar;
-cb.Label.String = 'RMS Pressure (MPa)';
+cb.Label.String = 'Pressure (MPa)';
 xlabel('x (mm)')
 ylabel('y (mm)')
 zlabel('z (mm)')
@@ -251,7 +211,7 @@ hold off
 rotate3d
 
 % %% Plot 3D orthogonal views - Relative to scan centre
-% figure(3)
+% figure()
 % hold on
 % 
 % % XY plane
@@ -280,11 +240,11 @@ rotate3d
 
 %% 
 %% Plot 2D XY Plane
-figure(3)
+figure()
 subplot(1, 2, 1); % Create a subplot for XY Plane
 imagesc(raster.xs, raster.ys, MPa.XY')
 cb = colorbar;
-cb.Label.String = 'RMS Pressure (MPa)';
+cb.Label.String = 'Pressure (MPa)';
 xlabel('X (mm)');
 ylabel('Y (mm)');
 title(strcat('Pressure in XY Plane at z =',{' '}, string(round(raster.zPlane, 1)), ' mm'));
@@ -294,33 +254,10 @@ axis image; % Set aspect ratio suitable for images
 subplot(1, 2, 2); % Create a subplot for YZ Plane
 imagesc(raster.ys, raster.zs, MPa.YZ') % Flip the z-axis
 cb = colorbar;
-cb.Label.String = 'RMS Pressure (MPa)';
+cb.Label.String = 'Pressure (MPa)';
 xlabel('Y (mm)');
 ylabel('Z (mm)');
-title(strcat('Pressure in YZ Plane at x =',{' '}, string(round(raster.xs(x_index), 1)), ' mm'));
-axis xy; % Correct the axis direction
-axis image; % Set aspect ratio suitable for images
-set(gca, 'YDir', 'reverse'); % Reverse the z-axis
-
-%% Plot 2D Phase at 1MHz
-figure(4)
-subplot(1, 2, 1); % Create a subplot for XY Plane
-imagesc(raster.xs, raster.ys, Phase.XY')
-cb = colorbar;
-% cb.Label.String = 'Phase (degrees)';
-xlabel('X (mm)');
-ylabel('Y (mm)');
-title(strcat('Phase at 1MHz in XY Plane at z =',{' '}, string(round(raster.zPlane, 1)), ' mm'));
-axis xy; % Correct the axis direction
-axis image; % Set aspect ratio suitable for images
-
-subplot(1, 2, 2); % Create a subplot for YZ Plane
-imagesc(raster.ys, raster.zs, Phase.YZ')
-cb = colorbar;
-% cb.Label.String = 'Phase (degrees)';
-xlabel('Y (mm)');
-ylabel('Z (mm)');
-title(strcat('Phase at 1MHz in YZ Plane at x =',{' '}, string(round(raster.xs(x_index), 1)), ' mm'));
+title(strcat('Pressure in YZ Plane at x =',{' '}, string(x), ' mm'));
 axis xy; % Correct the axis direction
 axis image; % Set aspect ratio suitable for images
 set(gca, 'YDir', 'reverse'); % Reverse the z-axis

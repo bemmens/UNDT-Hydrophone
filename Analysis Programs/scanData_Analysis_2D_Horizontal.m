@@ -17,7 +17,6 @@ elseif analysisVersion ~= scpSettings.scanVersion
     warning("Scan and analysis programs have mismatched versions.")
 end
 
-
 %%
 % Useful Constants
 t = (1:scpSettings.RecordLength)*1e6/scpSettings.SampleFrequency; % us
@@ -99,7 +98,7 @@ y = raster.ys(y_index);
 xlabel('Time [us]');
 % ylabel('Amplitude [MPa]');
 hold off
-%legend('Raw Waveform','Mean waveform','pkrange min','pkrange max','Vrms')
+legend('Raw Waveform','Mean waveform')
 % xlim([0,10])
 
 %% Bandpass filter 
