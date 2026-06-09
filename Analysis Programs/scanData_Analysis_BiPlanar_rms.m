@@ -5,8 +5,8 @@ clear all
 analysisVersion = 3;
 
 %% Load Data
-folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\';
-file_name = 'PSV_3MHz_1mm_5';
+folder_path = '/Users/gv19838/Library/CloudStorage/OneDrive-UniversityofBristol/PhD/Hydrophone/UNDT-Hydrophone/DataOut/';
+file_name = 'DIY_Acrylic_Day4_4_PD8';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')
@@ -40,7 +40,7 @@ disp(size(scanData_noBias.YZ))
 % %% Bandpass filter 
 % 
 x_index = 7;
-y_index = 15;
+y_index = 6;
 z_index = 10;
 
 
@@ -306,7 +306,8 @@ set(gca, 'YDir', 'reverse'); % Reverse the z-axis
 figure(4)
 subplot(1, 2, 1); % Create a subplot for XY Plane
 imagesc(raster.xs, raster.ys, Phase.XY')
-cb = colorbar;
+colormap Twilight 
+cb = colorbar();
 % cb.Label.String = 'Phase (degrees)';
 xlabel('X (mm)');
 ylabel('Y (mm)');
