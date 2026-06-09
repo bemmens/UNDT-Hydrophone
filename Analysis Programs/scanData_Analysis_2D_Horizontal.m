@@ -5,8 +5,8 @@ clear all
 analysisVersion = 4;
 
 %% Load Data
-folder_path = '/Users/gv19838/Library/CloudStorage/OneDrive-UniversityofBristol/PhD/Hydrophone/UNDT-Hydrophone/DataOut/';
-file_name = 'DIY_Acrylic_Day4_4_PDRemoved_HD_2D';
+folder_path = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\';
+file_name = 'DIYMk2_Day5_8_2p5V_Vortex_2DBonus';
 path = strcat(folder_path,file_name,'.mat');
 load(path)
 disp('Data Timestamp:')

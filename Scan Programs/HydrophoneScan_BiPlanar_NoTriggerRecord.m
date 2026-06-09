@@ -8,7 +8,7 @@ fclose all;
 
 %% Check Savefile
 File_loc = 'C:\Users\Public\Documents\GitHub\UNDT-Hydrophone\DataOut\'; % CHECK
-File_name = 'DIYMk2_Day4_4'; % CHECK
+File_name = 'DIYMk2_Day5_8_2p5V_Vortex'; % CHECK
 Save_String = strcat(File_loc,File_name,'.mat');
 
 if isfile(Save_String)
@@ -62,7 +62,7 @@ if exist('scp', 'var')
     scp.SampleFrequency = MHz*1e6; %  MHz
 
     % Set record length:
-    record_time = 500/1e6; % seconds                % CHECK
+    record_time = 1000/1e6; % seconds                % CHECK
     scp.RecordLength = scp.SampleFrequency*record_time; % n Samples: max = 33553920 ~ 3e7 (67107840?)    
 
     % Set pre sample ratio:
@@ -184,16 +184,16 @@ wavelength = c_water*1e3/Hz; % in mm
 % raster.home = [xhome,yhome,zhome]; % home position [x,y,z] in mm     % CHECK
 % raster.size = [xsize ysize zsize]; % [X,Y,Z] in mm                      % CHECK
 
-surface = 8.95;
+surface = 11.5;
 raster.size = [10 10 10]; % [X,Y,Z] in mm                      % CHECK
 raster.home = [27.45   22.2   surface+raster.size(3)/2]; % home position [x,y,z] in mm     % CHECK
 % raster.step = [1/16,1/16,1/32]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
-% raster.step = [1/8,1/8,1/32]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
-raster.step = [1/4,1/4,1/16]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
+raster.step = [1/8,1/8,1/32]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
+% raster.step = [1/4,1/4,1/16]*wavelength; % [dx,dy,dz] mm - must be greater than zero          % CHECK
 
 
 % raster.zPlane = raster.home(3); % the position of the xy plane in the z axis
-raster.zPlane = 12.75; % the position of the xy plane in the z axis
+raster.zPlane = 13.7; % the position of the xy plane in the z axis
 
 raster.pause_time = 20/1000; % s - Time for motion to stop before  measurement - Oscilliscope will wait for itself     % CHECK
 
